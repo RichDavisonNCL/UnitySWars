@@ -5,11 +5,11 @@ using System.IO;
 
 using SWars;
 using static SwarsFunctions;
+using static SWarsVerify;
 
 public class MapLoader// : MonoBehaviour
 {
     MapHeader header;
-
 
     List<SWars.TerrainData> terrainData = new List<SWars.TerrainData>();
 
@@ -60,19 +60,30 @@ public class MapLoader// : MonoBehaviour
     //Loaded by LoadSpriteData function
     MapSubHeaderPreamble subHeaderPreamble;
     List<SubHeaderA> subHeaderA = new List<SubHeaderA>();
-    List<SubHeaderB> subHeaderB = new List<SubHeaderB>();
+    SubHeaderB subHeaderB ;
 
-    List<SubLockA> subBlockAData = new List<SubLockA>();
+    List<SubBlockA> subBlockAData = new List<SubBlockA>();
     List<SubBlockB> subBlockBData = new List<SubBlockB>();
 
     List<SpriteSubBlock> spriteSubBlockData = new List<SpriteSubBlock>();
     List<DataBlockC> dataBlockC = new List<DataBlockC>();
 
+    string file = null;
+
     public GameObject LoadMap(string filename, Material[] materialSet)
     {
+        if(!File.Exists(filename))
+        {
+            return null;
+        }
+        file = filename;
         using (BinaryReader reader = new BinaryReader(File.Open(filename, FileMode.Open)))
         {
             header = SwarsFunctions.ByteToType<SWars.MapHeader>(reader);
+            if(!Validate(header))
+            {
+                Debug.LogError("Header failed to validate!");
+            }
 
             LoadTerrainData(reader);
             LoadTextureInfo(reader);
@@ -81,90 +92,13 @@ public class MapLoader// : MonoBehaviour
             LoadUnknownData(reader);
             LoadSpriteData(reader);
 
-            List<int>[]       meshIndices     = new List<int>[5];
-
-            for(int i = 0; i < 5; ++i)
-            {
-                meshIndices[i] = new List<int>();
-            }
-
-            List<Vector3>   meshVertices    = new List<Vector3>();
-            List<Vector2>   meshTexCoords   = new List<Vector2>();
-
-            for (int y = 0; y < 127; ++y)
-            {
-                for (int x = 0; x < 127; ++x)
-                {
-                    SWars.TerrainData dataA = terrainData[(y * 128) + x];
-                    SWars.TerrainData dataB = terrainData[(y * 128) + (x+1)];
-                    SWars.TerrainData dataC = terrainData[((y+1) * 128) + (x+1)];
-                    SWars.TerrainData dataD = terrainData[((y+1) * 128) + (x+0)];
-
-                    SWars.QuadTextureInfo quadUV = quadTexInfo[dataA.quadIndex & 0x3FFF];
-
-                    meshIndices[quadUV.texNum].Add(meshVertices.Count + 0);
-                    meshIndices[quadUV.texNum].Add(meshVertices.Count + 2);
-                    meshIndices[quadUV.texNum].Add(meshVertices.Count + 1);
-                    meshIndices[quadUV.texNum].Add(meshVertices.Count + 3);
-                    meshIndices[quadUV.texNum].Add(meshVertices.Count + 2);
-                    meshIndices[quadUV.texNum].Add(meshVertices.Count + 0);
-
-                    int flipOrder = dataA.quadIndex & 65535;
-
-                    if(flipOrder > 0)
-                    {
-                        meshTexCoords.Add(new Vector2(quadUV.v2x, quadUV.v2y) / 255.0f);
-                        meshTexCoords.Add(new Vector2(quadUV.v1x, quadUV.v1y) / 255.0f);
-                        meshTexCoords.Add(new Vector2(quadUV.v4x, quadUV.v4y) / 255.0f);
-                        meshTexCoords.Add(new Vector2(quadUV.v3x, quadUV.v3y) / 255.0f);  
-
-                        meshVertices.Add(new Vector3(x+1, dataC.vertexHeight / 32.0f, y+1)  * 256);
-                        meshVertices.Add(new Vector3(x+0, dataD.vertexHeight / 32.0f, y+1)  * 256);
-                        meshVertices.Add(new Vector3(x+0, dataA.vertexHeight / 32.0f, y)    * 256);
-                        meshVertices.Add(new Vector3(x+1, dataB.vertexHeight / 32.0f, y)    * 256);
-                    }
-                    else
-                    {
-                        meshTexCoords.Add(new Vector2(quadUV.v1x, quadUV.v1y) / 255.0f);
-                        meshTexCoords.Add(new Vector2(quadUV.v2x, quadUV.v2y) / 255.0f);
-                        meshTexCoords.Add(new Vector2(quadUV.v3x, quadUV.v3y) / 255.0f);
-                        meshTexCoords.Add(new Vector2(quadUV.v4x, quadUV.v4y) / 255.0f);
-
-                        meshVertices.Add(new Vector3(x + 0, dataA.vertexHeight / 32.0f, y)      * 256);
-                        meshVertices.Add(new Vector3(x + 1, dataB.vertexHeight / 32.0f, y)      * 256);
-                        meshVertices.Add(new Vector3(x + 1, dataC.vertexHeight / 32.0f, y + 1)  * 256);
-                        meshVertices.Add(new Vector3(x + 0, dataD.vertexHeight / 32.0f, y + 1)  * 256);
-                    }
-                }
-            }
-
-            GameObject o = new GameObject();
-            o.name = filename;
-
-            o.transform.localScale = Vector3.one;
-
-            Mesh map = new Mesh();
-            map.SetVertices(meshVertices);
-            map.SetUVs(0, meshTexCoords);
-            map.subMeshCount = 5;
-            for (int i = 0; i < 5; ++i)
-            {
-                map.SetIndices(meshIndices[i], MeshTopology.Triangles, i);
-            }
-            map.name = filename;
-
-            MeshRenderer r  = o.AddComponent<MeshRenderer>();
-            MeshFilter f    = o.AddComponent<MeshFilter>();
-            f.mesh          = map;
-            r.materials     = materialSet;
-
+            GameObject o = CreateMapMesh(filename, materialSet);
             GameObject buildingRoot = new GameObject();
             buildingRoot.name = "Buildings";
             buildingRoot.transform.parent = o.transform;
             buildingRoot.transform.localScale = Vector3.one;
             //Now to handle any buildings!
             CreateBuildingMeshes(buildingRoot, materialSet);
-
 
             GameObject spritesRoot = new GameObject();
             spritesRoot.name = "Sprites";
@@ -192,6 +126,10 @@ public class MapLoader// : MonoBehaviour
         for (int i = 0; i < spriteSubBlockData.Count; ++i)
         {
             SpriteSubBlock block = spriteSubBlockData[i];
+            if (!Validate(block))
+            {
+                Debug.LogError("SpriteSubBlock failed to validate!");
+            }
 
             GameObject o = GameObject.CreatePrimitive(PrimitiveType.Cube);
             o.name = SwarsFunctions.SpriteNumToName(block.spritenum) + " " + i;
@@ -206,7 +144,87 @@ public class MapLoader// : MonoBehaviour
             o.transform.position = new Vector3(xPos, 0, zPos);
         }
     }
+    GameObject CreateMapMesh(string filename, Material[] matSet)
+    {
+        List<int>[] meshIndices = new List<int>[5];
 
+        for (int i = 0; i < 5; ++i)
+        {
+            meshIndices[i] = new List<int>();
+        }
+
+        List<Vector3> meshVertices = new List<Vector3>();
+        List<Vector2> meshTexCoords = new List<Vector2>();
+
+        for (int y = 0; y < 127; ++y)
+        {
+            for (int x = 0; x < 127; ++x)
+            {
+                SWars.TerrainData dataA = terrainData[(y * 128) + x];
+                SWars.TerrainData dataB = terrainData[(y * 128) + (x + 1)];
+                SWars.TerrainData dataC = terrainData[((y + 1) * 128) + (x + 1)];
+                SWars.TerrainData dataD = terrainData[((y + 1) * 128) + (x + 0)];
+
+                SWars.QuadTextureInfo quadUV = GetQuadTexture(dataA.quadIndex & 0x3FFF, ref quadTexInfo);
+
+                meshIndices[quadUV.texNum].Add(meshVertices.Count + 0);
+                meshIndices[quadUV.texNum].Add(meshVertices.Count + 2);
+                meshIndices[quadUV.texNum].Add(meshVertices.Count + 1);
+                meshIndices[quadUV.texNum].Add(meshVertices.Count + 3);
+                meshIndices[quadUV.texNum].Add(meshVertices.Count + 2);
+                meshIndices[quadUV.texNum].Add(meshVertices.Count + 0);
+
+                int flipOrder = dataA.quadIndex & 65535;
+
+                if (flipOrder > 0)
+                {
+                    meshTexCoords.Add(new Vector2(quadUV.v2x, quadUV.v2y) / 255.0f);
+                    meshTexCoords.Add(new Vector2(quadUV.v1x, quadUV.v1y) / 255.0f);
+                    meshTexCoords.Add(new Vector2(quadUV.v4x, quadUV.v4y) / 255.0f);
+                    meshTexCoords.Add(new Vector2(quadUV.v3x, quadUV.v3y) / 255.0f);
+
+                    meshVertices.Add(new Vector3(x + 1, dataC.vertexHeight / 32.0f, y + 1) * 256);
+                    meshVertices.Add(new Vector3(x + 0, dataD.vertexHeight / 32.0f, y + 1) * 256);
+                    meshVertices.Add(new Vector3(x + 0, dataA.vertexHeight / 32.0f, y) * 256);
+                    meshVertices.Add(new Vector3(x + 1, dataB.vertexHeight / 32.0f, y) * 256);
+                }
+                else
+                {
+                    meshTexCoords.Add(new Vector2(quadUV.v1x, quadUV.v1y) / 255.0f);
+                    meshTexCoords.Add(new Vector2(quadUV.v2x, quadUV.v2y) / 255.0f);
+                    meshTexCoords.Add(new Vector2(quadUV.v3x, quadUV.v3y) / 255.0f);
+                    meshTexCoords.Add(new Vector2(quadUV.v4x, quadUV.v4y) / 255.0f);
+
+                    meshVertices.Add(new Vector3(x + 0, dataA.vertexHeight / 32.0f, y) * 256);
+                    meshVertices.Add(new Vector3(x + 1, dataB.vertexHeight / 32.0f, y) * 256);
+                    meshVertices.Add(new Vector3(x + 1, dataC.vertexHeight / 32.0f, y + 1) * 256);
+                    meshVertices.Add(new Vector3(x + 0, dataD.vertexHeight / 32.0f, y + 1) * 256);
+                }
+            }
+        }
+
+        GameObject o = new GameObject();
+        o.name = filename;
+
+        o.transform.localScale = Vector3.one;
+
+        Mesh map = new Mesh();
+        map.SetVertices(meshVertices);
+        map.SetUVs(0, meshTexCoords);
+        map.subMeshCount = 5;
+        for (int i = 0; i < 5; ++i)
+        {
+            map.SetIndices(meshIndices[i], MeshTopology.Triangles, i);
+        }
+        map.name = filename;
+
+        MeshRenderer r = o.AddComponent<MeshRenderer>();
+        MeshFilter f = o.AddComponent<MeshFilter>();
+        f.mesh = map;
+        r.materials = matSet;
+
+        return o;
+    }
     void CreateBuildingMeshes(GameObject rootObject, Material[] matSet)
     {
         List<GameObject> buildings = new List<GameObject>();
@@ -238,8 +256,8 @@ public class MapLoader// : MonoBehaviour
 
             for (int v = 0; v < meshes[i].triIndexNum; ++v)
             {
-                SWars.Tri tri               = tris[meshes[i].triIndexBegin + v];
-                SWars.TriTextureInfo triUV  = triTexInfo[tri.faceIndex];
+                SWars.Tri tri               = GetTri(meshes[i].triIndexBegin + v, ref tris);
+                SWars.TriTextureInfo triUV  = GetTriTexture(tri.faceIndex, ref triTexInfo); 
 
                 meshTexCoords.Add(new Vector2(triUV.v1x, triUV.v1y) / 255.0f);
                 meshTexCoords.Add(new Vector2(triUV.v2x, triUV.v2y) / 255.0f);
@@ -263,8 +281,8 @@ public class MapLoader// : MonoBehaviour
             }
             for (int v = 0; v < meshes[i].quadIndexNum; ++v)
             {
-                SWars.Quad quad                 = quads[meshes[i].quadIndexBegin + v];
-                SWars.QuadTextureInfo quadUV    = quadTexInfo[quad.faceIndex];
+                SWars.Quad quad                 = GetQuad(meshes[i].quadIndexBegin + v, ref quads);
+                SWars.QuadTextureInfo quadUV    = GetQuadTexture(quad.faceIndex, ref quadTexInfo);
 
                 int layer = quadUV.texNum;
 
@@ -394,78 +412,98 @@ public class MapLoader// : MonoBehaviour
 
         VerifyTag(reader, 0x10);
         ReadData<DataBlockR>(reader, ref blockRData, header.numBlockR);
-
-        //VerifyTag(reader, 0x11);
-        //ReadData<DataBlockP>(reader, ref blockPData, header.numBlockP);
     }
 
     void LoadSpriteData(BinaryReader reader)
     {
         VerifyTag(reader, 0x11);
         subHeaderPreamble = SwarsFunctions.ByteToType<SWars.MapSubHeaderPreamble>(reader);
+        if (!Validate(subHeaderPreamble))
+        {
+            Debug.LogError("MapSubHeaderPreamble failed to validate!");
+        }
 
-        ReadData<SubHeaderA>(reader, ref subHeaderA, 19);
-        ReadData<SubHeaderB>(reader, ref subHeaderB, 4); //TODO: Why did I think these were different?
+        ReadData<SubHeaderA>(reader, ref subHeaderA, 19); //Unknown 4 and 6 are always 0?
+
+        subHeaderB = SwarsFunctions.ByteToType<SWars.SubHeaderB>(reader);
+
+        foreach (SubHeaderA a in subHeaderA)
+        {
+            if(!Validate(a))
+            {
+                Debug.Log("Invalid Subheader A?");
+            }
+        }
+        if (!Validate(subHeaderB))
+        {
+            Debug.LogWarning("Invalid Subheader B?");
+        }
 
         bool done = false;
+        SubBlockA blockA = new SubBlockA();
+
         while (!done)//This can't be the 'proper' way to be doing this bit...
         {
-            SubLockA block = ByteToType<SubLockA>(reader);
-            subBlockAData.Add(block);
+            blockA = ByteToType<SubBlockA>(reader);
+            subBlockAData.Add(blockA);
 
-            if (block.unknown9 == 61440 && block.unknown8 == 0)
+            if (!Validate(blockA, subBlockAData.Count))
             {
-                done = true;
-                break;
+               // Debug.LogError("SubBlockA " + subBlockAData.Count + " failed to validate for file " + file);
             }
-            if (block.unknown9 == 65535 && block.unknown10 == 255)
+            if (IsFinalEntry(blockA))
             {
-                if ((block.unknown23 == 61440 && block.unknown24 == 65535) || (block.unknown23 >= 37376 && block.unknown24 == 0))
-                {
-                    SubLockA block2 = ByteToType<SubLockA>(reader);
-                    subBlockAData.Add(block2);
-                    done = true;
-                    break;
-                }
+                break;
             }
         }
         done = false;
-        int blockCount = 0;
+
+        SubBlockB blockB;
+        int finalCount = 0;
+
+        List<int> blockEnds = new List<int>();
         while (!done)//This can't be the 'proper' way to be doing this bit...
         {
-            SubBlockB block = ByteToType<SubBlockB>(reader);
-            subBlockBData.Add(block);
-
-            if (block.unknown1 == 0 && block.unknown2 == 32768)
+            blockB = ByteToType<SubBlockB>(reader);
+  
+            if (IsFinalEntry(blockB))
             {
-                if (block.unknown1 == subBlockBData[subBlockBData.Count - 3].unknown1 &&
-                    block.unknown2 == subBlockBData[subBlockBData.Count - 3].unknown2)
-                {
-                    blockCount++;
-                    if (blockCount == 3)
-                    {
-                        done = true;
-                        for (int j = 0; j < 12; ++j)
-                        {
-                            SubBlockB block2 = ByteToType<SubBlockB>(reader);
-                            subBlockBData.Add(block2);
-                        }
-                    }
-                }
+                blockEnds.Add(subBlockBData.Count);
+                finalCount++;
+            }         
+            subBlockBData.Add(blockB);
+
+            if (finalCount == 8)
+            {
+                break;
             }
         }
-        SubHeaderC spriteHeader = ByteToType<SubHeaderC>(reader);
 
+        SubHeaderC spriteHeader = ByteToType<SubHeaderC>(reader);
+        if (!Validate(spriteHeader))
+        {
+            Debug.LogError("Sprite Header failed to validate for file " + file);
+        }
         ReadData<SpriteSubBlock>(reader, ref spriteSubBlockData, spriteHeader.numSprites);
 
         SubHeaderD subHeaderD = ByteToType<SubHeaderD>(reader);
+        if(!Validate(subHeaderD))
+        {
+            Debug.LogWarning("Unusual SubHeaderD!");
+        }
         //unknown3 is pretty close to the size of the count
         //of the next bit * 4
 
         while(reader.BaseStream.Position != reader.BaseStream.Length)
         {
             DataBlockC block2 = ByteToType<DataBlockC>(reader);
+            if (!Validate(block2))
+            {
+                Debug.LogError("DataBlockC failed to validate!");
+            }
             dataBlockC.Add(block2);
         }
+        Debug.Log(subHeaderB.unknown1 + " , " + subBlockAData.Count);
+        //Debug.Log("SubHeaderD test: " + subHeaderD.unknown3 + ", vs loaded " + dataBlockC.Count + "(" + (subHeaderD.unknown3 / (float)dataBlockC.Count) + " )");
     }
 }

@@ -22,6 +22,18 @@ public class SWarsLoader : MonoBehaviour
     [SerializeField]
     List<GameObject> loadedMaps;
 
+    [SerializeField]
+    int mapToLoad = 1;
+
+    [SerializeField]
+    bool loadRange = false;
+
+    [SerializeField]
+    int firstRange = 1;
+
+    [SerializeField]
+    int lastRange = 79;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -89,7 +101,31 @@ public class SWarsLoader : MonoBehaviour
 
     void LoadMaps()
     {
-        loadedMaps.Add(LoadMap("Assets/GAME/MAPS/MAP001.MAD"));
+        if(loadRange)
+        {
+            for(int i = firstRange; i < lastRange; ++i)
+            {
+                string mapID = "MAP0";
+                if (i < 9)
+                {
+                    mapID += "0";
+                }
+                mapID += i;
+                Debug.Log("Trying to load map " + i);
+                loadedMaps.Add(LoadMap("Assets/GAME/MAPS/" + mapID + ".MAD"));
+            }
+        }
+        else
+        {
+            string mapID = "MAP0";
+            if(mapToLoad < 9)
+            {
+                mapID += "0";
+            }
+            mapID += mapToLoad;
+
+            loadedMaps.Add(LoadMap("Assets/GAME/MAPS/" + mapID + ".MAD"));
+        }
 
         GameObject mapObj = new GameObject("Maps");
         mapObj.transform.parent = transform;
@@ -97,8 +133,12 @@ public class SWarsLoader : MonoBehaviour
 
         for (int i = 0; i < loadedMaps.Count; ++i)
         {
-            loadedMaps[i].transform.parent      = mapObj.transform;
-            loadedMaps[i].transform.localScale  = Vector3.one;
+            if (loadedMaps[i])
+            {
+                loadedMaps[i].transform.parent = mapObj.transform;
+                loadedMaps[i].transform.localScale = Vector3.one;
+                loadedMaps[i].transform.localPosition = Vector3.up * i * 8192;
+            }
         }
     }
     GameObject LoadMap(string name)

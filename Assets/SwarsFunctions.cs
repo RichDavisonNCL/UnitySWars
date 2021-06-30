@@ -9,7 +9,7 @@ public class SwarsFunctions
         byte[] bytes = reader.ReadBytes(Marshal.SizeOf(typeof(T)));
 
         GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-        T theStructure = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
+        T theStructure  = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
         handle.Free();
 
         return theStructure;
@@ -41,6 +41,42 @@ public class SwarsFunctions
         }
         return true;
     }
+
+    public static SWars.Tri GetTri(int index, ref List<SWars.Tri> tris)
+    {
+        if (index >= tris.Count)
+        {
+            index = tris.Count - 1;
+        }
+        return tris[index];
+    }
+    public static SWars.Quad GetQuad(int index, ref List<SWars.Quad> quads)
+    {
+        if (index >= quads.Count)
+        {
+            index = quads.Count - 1;
+        }
+        return quads[index];
+    }
+
+    public static SWars.TriTextureInfo GetTriTexture(int index, ref List<SWars.TriTextureInfo> tris)
+    {
+        if (index >= tris.Count)
+        {
+            index = tris.Count - 1;
+        }
+        return tris[index];
+    }
+    public static SWars.QuadTextureInfo GetQuadTexture(int index, ref List<SWars.QuadTextureInfo> quads)
+    {
+        if (index >= quads.Count)
+        {
+            index = quads.Count - 1;
+        }
+        return quads[index];
+    }
+
+
 
     public static string SpriteNumToName(int nameID)
     {

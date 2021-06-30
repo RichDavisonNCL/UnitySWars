@@ -38,8 +38,6 @@ namespace SWars
         public ushort preamble8;           //0000    always 0
     };
 
-
-
     public struct SubHeaderA
     {
         public ushort unknown1;        //usually 65535
@@ -52,12 +50,33 @@ namespace SWars
 
     public struct SubHeaderB
     {
-        public ushort unknown1;        //usually 65535
-        public ushort unknown2;        //usually 65535
-        public ushort unknown3;        //num a
-        public ushort unknown4;        //0
-        public ushort unknown5;        //num a	
-        public ushort unknown6;        //0
+        public ushort unknown1;        //Seems to be always 4504?
+        public ushort unknown2;        
+        public ushort unknown3;       
+        public ushort unknown4;        
+        public ushort unknown5;        
+        public ushort unknown6;
+
+        public ushort unknown7;      
+        public ushort unknown8;
+        public ushort unknown9;
+        public ushort unknown10;
+        public ushort unknown11;
+        public ushort unknown12;
+
+        public ushort unknown13;
+        public ushort unknown14;
+        public ushort unknown15;
+        public ushort unknown16;
+        public ushort unknown17;
+        public ushort unknown18;
+
+        public ushort unknown19;
+        public ushort unknown20;
+        public ushort unknown21;
+        public ushort unknown22;
+        public ushort unknown23;
+        public ushort unknown24;
     };
 
     public struct SubHeaderC
@@ -81,7 +100,7 @@ namespace SWars
     };
 
 
-    public struct SubLockA
+    public struct SubBlockA
     {
         public ushort unknown1;        //usually 65535
         public ushort unknown2;        //usually 65535
@@ -185,7 +204,7 @@ namespace SWars
     };
 
 
-    public struct TerrainData   //block [A]
+    public struct TerrainData
     {
         public ushort quadIndex;               //quadVector2map index. This value may be bigger than the number of quad_uvfaces, see note (A).
         public ushort lightScale;              //unknown		//something to do with quads that ARENT lit?
@@ -201,7 +220,7 @@ namespace SWars
 
 
 
-    public struct QuadTextureInfo   //block [B]
+    public struct QuadTextureInfo
     {
         public char v1x;
         public char v1y;
@@ -218,7 +237,7 @@ namespace SWars
         public ushort blank4;
     };
 
-    public struct TriTextureInfo   //block [C]
+    public struct TriTextureInfo
     {
         public char v1x;
         public char v1y;
