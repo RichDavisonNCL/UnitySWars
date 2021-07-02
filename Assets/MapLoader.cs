@@ -1,26 +1,23 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using System.IO;
-
 using SWars;
+using UnityEngine;
 using static SwarsFunctions;
 using static SWarsVerify;
 
-public class MapLoader// : MonoBehaviour
+public class MapLoader
 {
     MapHeader header;
 
-    List<SWars.TerrainData> terrainData = new List<SWars.TerrainData>();
+    List<SWars.TerrainInfo> terrainData = new List<SWars.TerrainInfo>();
 
     List<QuadTextureInfo> quadTexInfo   = new List<QuadTextureInfo>();
     List<TriTextureInfo>  triTexInfo    = new List<TriTextureInfo>();
 
-
-    List<Vertex>  vertices    = new List<Vertex>();
-    List<Tri>     tris        = new List<Tri>();
-    List<Quad>    quads       = new List<Quad>();
-    List<MeshDetails>    meshes      = new List<MeshDetails>();
+    List<Vertex>        vertices    = new List<Vertex>();
+    List<Tri>           tris        = new List<Tri>();
+    List<Quad>          quads       = new List<Quad>();
+    List<MeshDetails>   meshes      = new List<MeshDetails>();
 
     List<LightInfo>   lightInfo      = new List<LightInfo>();
     List<LightDetail> lightDetail    = new List<LightDetail>();
@@ -43,32 +40,78 @@ public class MapLoader// : MonoBehaviour
     List<short> bytes11 = new List<short>();
     List<short> bytes12 = new List<short>();
     //Loaded by the LoadNavigation function
-    List<DataBlockK> blockKData    = new List<DataBlockK>();
-    List<short> bytes13                 = new List<short>();
+    List<DataBlockK>    blockKData      = new List<DataBlockK>();
+    List<short>         bytes13         = new List<short>();
     List<VehicleNavPoint> vehicleNavPoints = new List<VehicleNavPoint>();
-    List<short> bytes14                 = new List<short>();
-    List<DataBlockM> blockMData    = new List<DataBlockM>();
-    List<short> bytes15                 = new List<short>();
-    List<NPCNavPoint> navPoints   = new List<NPCNavPoint>();
-    List<short> bytes16                 = new List<short>();
-    List<NPCBlockLine> blockLines = new List<NPCBlockLine>();
-    List<short> bytes17                 = new List<short>();
+    List<short>         bytes14         = new List<short>();
+    List<DataBlockM>    blockMData      = new List<DataBlockM>();
+    List<short>         bytes15         = new List<short>();
+    List<NPCNavPoint>   navPoints       = new List<NPCNavPoint>();
+    List<short>         bytes16         = new List<short>();
+    List<NPCBlockLine>  blockLines      = new List<NPCBlockLine>();
+    List<short>         bytes17         = new List<short>();
     //Loaded by LoadUnknownData function
     List<DataBlockP> blockPData = new List<DataBlockP>();
     List<DataBlockQ> blockQData = new List<DataBlockQ>();
     List<DataBlockR> blockRData = new List<DataBlockR>();
     //Loaded by LoadSpriteData function
-    MapSubHeaderPreamble subHeaderPreamble;
-    List<SubHeaderA> subHeaderA = new List<SubHeaderA>();
-    SubHeaderB subHeaderB ;
+    MapSubHeaderPreamble    subHeaderPreamble;
+    List<SubHeaderA>        subHeaderA = new List<SubHeaderA>();
+    SubHeaderB              subHeaderB ;
 
-    List<SubBlockA> subBlockAData = new List<SubBlockA>();
-    List<SubBlockB> subBlockBData = new List<SubBlockB>();
+    List<SubBlockA>         subBlockAData = new List<SubBlockA>();
+    List<SubBlockB>         subBlockBData = new List<SubBlockB>();
 
-    List<SpriteSubBlock> spriteSubBlockData = new List<SpriteSubBlock>();
-    List<DataBlockC> dataBlockC = new List<DataBlockC>();
+    List<EntitySubBlock>    entitySubBlockData = new List<EntitySubBlock>();
+    List<DataBlockD>        dataBlockD = new List<DataBlockD>();
+
+    EntityHeader    entityHeader;
+    SubHeaderD      subHeaderD;
 
     string file = null;
+
+    bool zeroHeader             = false;
+    bool zeroTerrainInfo        = false;
+    bool zeroQuadTexInfo        = false;
+    bool zeroTriTexInfo         = false;
+    bool zeroVertices           = false;
+    bool zeroTris               = false;
+    bool zeroQuads              = false;
+    bool zeroMeshes             = false;
+    bool zeroLightInfo          = false;
+    bool zeroLightDetail        = false;
+    bool zeroBytes01            = false;
+    bool zeroBytes02            = false;
+    bool zeroBytes04            = false;
+    bool zeroBytes05            = false;
+    bool zeroBytes06            = false;
+    bool zeroBytes07            = false;
+    bool zeroBytes08            = false;
+    bool zeroBytes09            = false;
+    bool zeroBytes10            = false;
+    bool zeroBytes13            = false;
+    bool zeroBytes14            = false;
+    bool zeroBytes15            = false;
+    bool zeroBytes16            = false; 
+    bool zeroBytes17            = false;
+    bool zeroBlockIData         = false;
+    bool zeroBlockKData         = false;
+    bool zeroVehicleNavPoints   = false;
+    bool zeroBlockMData         = false;
+    bool zeroNavPoints          = false;
+    bool zeroBlockLines         = false;
+    bool zeroBlockPData         = false;
+    bool zeroBlockQData         = false;
+    bool zeroBlockRData         = false;
+    bool zeroSubHeaderPreamble  = false;
+    bool zeroSubHeaderA         = false;
+    bool zeroSubHeaderB         = false;
+    bool zeroSubBlockAData      = false;
+    bool zeroSubBlockBData      = false;
+    bool zeroEntityHeader       = false;
+    bool zeroSpriteSubBlockData = false;  
+    bool zeroSubHeaderD         = false;
+    bool zeroSubBlockDData      = false;
 
     public GameObject LoadMap(string filename, Material[] materialSet)
     {
@@ -93,18 +136,40 @@ public class MapLoader// : MonoBehaviour
             LoadSpriteData(reader);
 
             GameObject o = CreateMapMesh(filename, materialSet);
+            SWarsMap mapComponent = o.AddComponent<SWarsMap>();
+            mapComponent.loader = this;
+
             GameObject buildingRoot = new GameObject();
             buildingRoot.name = "Buildings";
-            buildingRoot.transform.parent = o.transform;
-            buildingRoot.transform.localScale = Vector3.one;
+            buildingRoot.transform.parent       = o.transform;
+            buildingRoot.transform.localScale   = Vector3.one;
             //Now to handle any buildings!
             CreateBuildingMeshes(buildingRoot, materialSet);
 
             GameObject spritesRoot = new GameObject();
             spritesRoot.name = "Sprites";
-            spritesRoot.transform.parent = o.transform;
-            spritesRoot.transform.localScale = Vector3.one;
+            spritesRoot.transform.parent        = o.transform;
+            spritesRoot.transform.localScale    = Vector3.one;
             CreateSprites(spritesRoot);
+
+            GameObject blockLines = new GameObject();
+            blockLines.name = "BlockLines";
+            blockLines.transform.parent     = o.transform;
+            blockLines.transform.localScale = Vector3.one;
+            CreateBlockLines(blockLines);
+
+
+            GameObject vehicleNav = new GameObject();
+            vehicleNav.name = "Vehicle Nav";
+            vehicleNav.transform.parent     = o.transform;
+            vehicleNav.transform.localScale = Vector3.one;
+            CreateVehicleNavPoints(vehicleNav);
+
+            GameObject lightDetail = new GameObject();
+            lightDetail.name                    = "Light Details";
+            lightDetail.transform.parent        = o.transform;
+            lightDetail.transform.localScale    = Vector3.one;
+            CreateLightDetails(lightDetail);
 
             return o;
         }
@@ -116,16 +181,60 @@ public class MapLoader// : MonoBehaviour
         {
             for (int y = 0; y < 128; ++y)
             {
-                terrainData.Add(SwarsFunctions.ByteToType<SWars.TerrainData>(reader));
+                terrainData.Add(SwarsFunctions.ByteToType<SWars.TerrainInfo>(reader));
             }
         }
     }
 
+    void CreateLightDetails(GameObject parent)
+    {
+        for (int i = 0; i < lightDetail.Count; ++i)
+        {
+            GameObject light = new GameObject();
+            light.name = "LightDetail " + i;
+            light.transform.parent        = parent.transform;
+            light.transform.localScale    = Vector3.one;
+
+            SWarsLightDataVis vis = light.AddComponent<SWarsLightDataVis>();
+            vis.SetLightDetails(lightDetail[i], this, i);
+        }
+    }
+
+    void CreateBlockLines(GameObject parent)
+    {
+        for(int i = 0; i < blockLines.Count; ++i)
+        {
+            GameObject blockLine = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            blockLine.name = "Line " + i;
+            blockLine.transform.parent     = parent.transform;
+            blockLine.transform.localScale = Vector3.one * 25.0f;
+
+            SWarsBlockLineVis vis = blockLine.AddComponent<SWarsBlockLineVis>();
+            vis.SetBlockLineDetails(blockLines[i], this, i);
+        }
+    }
+
+    void CreateVehicleNavPoints(GameObject parent)
+    {
+        SWarsVehicleNavigationSetup setup =  parent.AddComponent<SWarsVehicleNavigationSetup>();
+        for (int i = 0; i < vehicleNavPoints.Count; ++i)
+        {
+            GameObject navPoint = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            navPoint.name = "NavPoint " + i;
+            navPoint.transform.parent = parent.transform;
+            navPoint.transform.localScale = Vector3.one * 25.0f;
+
+            SWarsVehicleNavigationVis vis = navPoint.AddComponent<SWarsVehicleNavigationVis>();
+            vis.SetNavDetails(vehicleNavPoints[i], this, i);
+        }
+        setup.BuildConnections();
+    }
+
     void CreateSprites(GameObject gameObject)
     {
-        for (int i = 0; i < spriteSubBlockData.Count; ++i)
+        for (int i = 0; i < entitySubBlockData.Count; ++i)
         {
-            SpriteSubBlock block = spriteSubBlockData[i];
+            EntitySubBlock block = entitySubBlockData[i];
             if (!Validate(block))
             {
                 Debug.LogError("SpriteSubBlock failed to validate!");
@@ -160,10 +269,10 @@ public class MapLoader// : MonoBehaviour
         {
             for (int x = 0; x < 127; ++x)
             {
-                SWars.TerrainData dataA = terrainData[(y * 128) + x];
-                SWars.TerrainData dataB = terrainData[(y * 128) + (x + 1)];
-                SWars.TerrainData dataC = terrainData[((y + 1) * 128) + (x + 1)];
-                SWars.TerrainData dataD = terrainData[((y + 1) * 128) + (x + 0)];
+                SWars.TerrainInfo dataA = terrainData[(y * 128) + x];
+                SWars.TerrainInfo dataB = terrainData[(y * 128) + (x + 1)];
+                SWars.TerrainInfo dataC = terrainData[((y + 1) * 128) + (x + 1)];
+                SWars.TerrainInfo dataD = terrainData[((y + 1) * 128) + (x + 0)];
 
                 SWars.QuadTextureInfo quadUV = GetQuadTexture(dataA.quadIndex & 0x3FFF, ref quadTexInfo);
 
@@ -242,6 +351,7 @@ public class MapLoader// : MonoBehaviour
             o.transform.parent      = rootObject.transform;
             o.transform.localScale  = Vector3.one;
             buildings.Add(o);
+
         }
         for (int i = 0; i < header.numMeshes; ++i)
         {
@@ -267,7 +377,7 @@ public class MapLoader// : MonoBehaviour
 
                 if (layer < 0 || layer > 4)
                 {
-                    Debug.Log("incorrect texnum " + layer);
+                   // Debug.Log("incorrect texnum " + layer);
                     layer = 0;
                 }
 
@@ -328,12 +438,35 @@ public class MapLoader// : MonoBehaviour
             GameObject o = new GameObject();
             o.name = "Building part " + buildings[meshes[i].buildingIndex].transform.childCount;
             o.transform.parent = buildings[meshes[i].buildingIndex].transform;
-            o.transform.localPosition = new Vector3(meshes[i].xPosition, meshes[i].yPosition, meshes[i].zPosition);
+            float yPos = meshes[i].yPosition;
+            if(yPos > 16384) //TODO
+            {
+                yPos = 0;
+            }
+            o.transform.localPosition = new Vector3(meshes[i].xPosition, yPos, meshes[i].zPosition);
             o.transform.localScale = Vector3.one;
             MeshRenderer r  = o.AddComponent<MeshRenderer>();
             MeshFilter f    = o.AddComponent<MeshFilter>();
             f.mesh          = buildingPart;
             r.materials     = matSet;
+
+            SWarsBuildingDataVis dataVis = o.AddComponent<SWarsBuildingDataVis>();
+            dataVis.SetMeshDetails(meshes[i], this, i);
+
+            //dataVis.SetBlockDDetails(dataBlockD[i], this, i);
+
+            int b = 0;
+            foreach (DataBlockD d in dataBlockD)
+            {
+                //seems that 1 isn't the index?
+                //3,76,77,31
+                if (d.data[1] == meshes[i].buildingIndex)
+                {
+                    dataVis.SetBlockDDetails(d, this, b);
+                    break;
+                }
+                b++;
+            }
         }
     }
 
@@ -368,6 +501,22 @@ public class MapLoader// : MonoBehaviour
 
         VerifyTag(reader, 0x06);
         ReadData<LightDetail>(reader, ref lightDetail, header.numLights);
+
+        for (int i = 0; i < lightInfo.Count; ++i)
+        {
+            if (!Validate(lightInfo[i], lightDetail.Count))
+            {
+                Debug.LogWarning("Unusual Light Info " + i);
+            }
+        }
+
+        for (int i = 0; i < lightDetail.Count; ++i)
+        {
+            if(!Validate(lightDetail[i]))
+            {
+                Debug.LogWarning("Unusual Light Detail " + i);
+            }
+        }
         ReadUnknownData(reader, ref bytes08, 320 / 2);
 
         VerifyTag(reader, 0x07);
@@ -377,6 +526,46 @@ public class MapLoader// : MonoBehaviour
         VerifyTag(reader, 0x08);
         ReadData<Quad>(reader, ref quads, header.numQuads);
         ReadUnknownData(reader, ref bytes10, 80000 / 2);
+        
+        int max0 = 0;
+        int max1 = 0;
+        int max2 = 0;
+
+        //List<ushort> allTes3 = new List<ushort>();
+        List<ushort> allTest = new List<ushort>();
+        HashSet<ushort> allTest2 = new HashSet<ushort>();
+
+        for(int i = 0; i < lightInfo.Count; ++i)
+        {
+
+            max0 = Mathf.Max(max0, lightInfo[i].unknown1);
+            max1 = Mathf.Max(max1, lightInfo[i].lightDetailID);
+            max2 = Mathf.Max(max2, lightInfo[i].unknown3);
+
+            LightInfo info = lightInfo[i];
+            info.unknown1 = (ushort)(Random.value * 4096);
+            info.unknown1 = 65535;
+            info.unknown1 = 4;
+
+            int testX = info.unknown3 / 128;
+            int testY = info.unknown3 % 128;
+
+            //GameObject o            = new GameObject();
+            //o.transform.position    = new Vector3(testX * 32, 0, testY * 32);
+
+            if (info.unknown3 != 0)
+            {
+                allTest.Add(info.unknown3);
+                if(!allTest2.Add(info.unknown3))
+                {
+                    Debug.Log("Unknown3 is NOT UNIQUE"); //Seems like it is! LOL NO
+                }
+            }
+
+            lightInfo[i] = info;
+        }
+   
+        Debug.Log("Light info ranges: " + max0 + " , " + max1 + " , " + max2 + ". Light Detail Count: " + lightDetail.Count);
     }
 
     void LoadNavigation(BinaryReader reader)
@@ -388,6 +577,13 @@ public class MapLoader// : MonoBehaviour
         VerifyTag(reader, 0x0A);
         ReadData<VehicleNavPoint>(reader, ref vehicleNavPoints, header.numNavPoints);
         ReadUnknownData(reader, ref bytes14, 1800 / 2);
+        for(int i = 0; i < vehicleNavPoints.Count; ++i)
+        {
+            if(!Validate(vehicleNavPoints[i]))
+            {
+                Debug.LogWarning("Unusual vehicle nav point " + i);
+            }
+        }
 
         VerifyTag(reader, 0x0B);
         ReadData<DataBlockM>(reader, ref blockMData, header.numBlockM);
@@ -479,14 +675,14 @@ public class MapLoader// : MonoBehaviour
             }
         }
 
-        SubHeaderC spriteHeader = ByteToType<SubHeaderC>(reader);
-        if (!Validate(spriteHeader))
+        entityHeader = ByteToType<EntityHeader>(reader);
+        if (!Validate(entityHeader))
         {
             Debug.LogError("Sprite Header failed to validate for file " + file);
         }
-        ReadData<SpriteSubBlock>(reader, ref spriteSubBlockData, spriteHeader.numSprites);
+        ReadData<EntitySubBlock>(reader, ref entitySubBlockData, entityHeader.numSprites);
 
-        SubHeaderD subHeaderD = ByteToType<SubHeaderD>(reader);
+        subHeaderD = ByteToType<SubHeaderD>(reader);
         if(!Validate(subHeaderD))
         {
             Debug.LogWarning("Unusual SubHeaderD!");
@@ -496,14 +692,222 @@ public class MapLoader// : MonoBehaviour
 
         while(reader.BaseStream.Position != reader.BaseStream.Length)
         {
-            DataBlockC block2 = ByteToType<DataBlockC>(reader);
+            DataBlockD block2 = ByteToType<DataBlockD>(reader);
             if (!Validate(block2))
             {
                 Debug.LogError("DataBlockC failed to validate!");
             }
-            dataBlockC.Add(block2);
+            dataBlockD.Add(block2);
         }
         Debug.Log(subHeaderB.unknown1 + " , " + subBlockAData.Count);
         //Debug.Log("SubHeaderD test: " + subHeaderD.unknown3 + ", vs loaded " + dataBlockC.Count + "(" + (subHeaderD.unknown3 / (float)dataBlockC.Count) + " )");
+    }
+
+    public void WriteMeshDetails(MeshDetails details, int index)
+    {
+        meshes[index] = details;
+    }
+
+    public void WriteBlockDDetails(DataBlockD details, int index)
+    {
+        dataBlockD[index] = details;
+    }
+
+    public void SaveToOriginalFile()
+    {
+        SaveMap(file);
+    }
+
+    void SaveMap(string filename)
+    {
+        int divider     = filename.LastIndexOf('/');
+        string realname = filename.Substring(divider);
+        string path     = filename.Substring(0, divider);
+        string newName  = path + "/Saved" + realname;
+
+        if(!Directory.Exists(path + "/Saved/"))
+        {
+            Directory.CreateDirectory(path + "/Saved/");
+        }
+
+        using (BinaryWriter writer = new BinaryWriter(File.Open(newName, FileMode.OpenOrCreate)))
+        {
+            WriteType<MapHeader>(writer, header, zeroHeader);
+
+            WriteData<TerrainInfo>(writer, ref terrainData, zeroTerrainInfo);
+
+            WriteTag(writer, 0x00);
+            WriteData<QuadTextureInfo>(writer, ref quadTexInfo, zeroQuadTexInfo);
+            WriteData<short>(writer, ref bytes01, zeroBytes01);
+
+            WriteTag(writer, 0x01);
+            WriteData<TriTextureInfo>(writer, ref triTexInfo, zeroTriTexInfo);
+            WriteData<short>(writer, ref bytes02, zeroBytes02);
+
+            WriteTag(writer, 0x02);
+            WriteData<Vertex>(writer, ref vertices, zeroVertices);
+            WriteData<short>(writer, ref bytes04, zeroBytes04);
+
+            WriteTag(writer, 0x03);
+            WriteData<Tri>(writer, ref tris, zeroTris);
+            WriteData<short>(writer, ref bytes05, zeroBytes05);
+
+            for(int i = 0; i < meshes.Count; ++i)
+            {
+                MeshDetails m = meshes[i];
+                m.noClip = 256;
+                meshes[i] = m;
+            }
+
+            //foreach(MeshDetails m in meshes)
+            //{
+            //    m.noClip = 256;
+            //}
+
+            WriteTag(writer, 0x04);
+            WriteData<MeshDetails>(writer, ref meshes, zeroMeshes);
+            WriteData<short>(writer, ref bytes06, zeroBytes06);
+
+            WriteTag(writer, 0x05);
+            WriteData<LightInfo>(writer, ref lightInfo, zeroLightInfo);
+            WriteData<short>(writer, ref bytes07, zeroBytes07);
+
+            WriteTag(writer, 0x06);
+            WriteData<LightDetail>(writer, ref lightDetail, zeroLightDetail);
+            WriteData<short>(writer, ref bytes08, zeroBytes08);
+
+            WriteTag(writer, 0x07);
+            WriteData<DataBlockI>(writer, ref blockIData, zeroBlockIData);
+            WriteData<short>(writer, ref bytes09, zeroBytes09);
+
+            WriteTag(writer, 0x08);
+            WriteData<Quad>(writer, ref quads, zeroQuads);
+            WriteData<short>(writer, ref bytes10, zeroBytes10);
+
+            WriteTag(writer, 0x09);
+            WriteData<DataBlockK>(writer, ref blockKData, zeroBlockKData);
+            WriteData<short>(writer, ref bytes13, zeroBytes13);
+
+            WriteTag(writer, 0x0A);
+            WriteData<VehicleNavPoint>(writer, ref vehicleNavPoints, zeroVehicleNavPoints);
+            WriteData<short>(writer, ref bytes14, zeroBytes14);
+
+            WriteTag(writer, 0x0B);
+            WriteData<DataBlockM>(writer, ref blockMData, zeroBlockMData);
+            WriteData<short>(writer, ref bytes15, zeroBytes15);
+
+            WriteTag(writer, 0x0C);
+            WriteData<NPCNavPoint>(writer, ref navPoints, zeroNavPoints);
+            WriteData<short>(writer, ref bytes16, zeroBytes16);
+
+            WriteTag(writer, 0x0D);
+            WriteData<NPCBlockLine>(writer, ref blockLines, zeroBlockLines);
+            WriteData<short>(writer, ref bytes17, zeroBytes17);
+
+            WriteTag(writer, 0x0E);
+            WriteData<DataBlockP>(writer, ref blockPData, zeroBlockPData);
+
+            WriteTag(writer, 0x0F);
+            WriteData<DataBlockQ>(writer, ref blockQData, zeroBlockQData);
+
+            WriteTag(writer, 0x10);
+            WriteData<DataBlockR>(writer, ref blockRData, zeroBlockRData);
+
+            WriteTag(writer, 0x11);
+            WriteType<MapSubHeaderPreamble>(writer, subHeaderPreamble, zeroSubHeaderPreamble);
+
+            WriteData<SubHeaderA>(writer, ref subHeaderA, zeroSubHeaderA);
+            WriteType<SubHeaderB>(writer, subHeaderB, zeroSubHeaderB);
+
+            WriteData<SubBlockA>(writer, ref subBlockAData, zeroSubBlockAData);
+            WriteData<SubBlockB>(writer, ref subBlockBData, zeroSubBlockBData);
+
+            WriteType<EntityHeader>(writer, entityHeader, zeroEntityHeader);
+            WriteData<EntitySubBlock>(writer, ref entitySubBlockData, zeroSpriteSubBlockData);
+
+            WriteType<SubHeaderD>(writer, subHeaderD, zeroSubHeaderD); //This can be zeroed out, doesn't affect next block?
+
+            HashSet<int> buildingIDs = new HashSet<int>();
+
+            foreach(SWars.MeshDetails d in meshes)
+            {
+                buildingIDs.Add(d.buildingIndex);
+            }
+
+            Random.InitState(0); //Seed 0,5 makes a building rotate! 999 makes seed 0 building rotate
+            //8 has a flying moving car? 
+            //9 puts some police on alert state and instachase the player
+            //Zeroing out the 'LightInfo' data fixes the line loops and puts them to default?
+
+            //Buildings, and rain, disappear when this is zeroed out!
+
+            List<int>[] testNumbers = new List<int>[84];
+            bool[] nonZero = new bool[84];
+            for (int i = 0; i < 84; ++i)
+            {
+                testNumbers[i] = new List<int>();
+            }
+            //Definitely related to buildings etc - randomly removing removes building parts
+            //for (int i = 0; i < dataBlockD.Count; ++i)
+            //{
+            //    DataBlockD d = dataBlockD[i];
+
+            //    for(int j = 0; j < 84; ++j)
+            //    {                   
+            //        testNumbers[j].Add(d.data[j]);
+
+            //        if(j == 1 || j == 76 || j == 77)
+            //        {
+            //            continue; //these relate to IDs, let's leave them alone...
+            //        }
+            //        //setting 31 to 0 makes them disappear from 3d and map view
+            //        //They look like indices into something or other...
+            //        //Forcing to 1 value makes 1 building appear in 3D. some others show in minimap?
+            //        if(j == 31)
+            //        {
+            //            continue;
+            //        }
+
+            //        if (j == 3|| j == 7)//Setting these to zero removes building from 3D view, not minimap
+            //        {
+            //            continue;
+            //        }
+            //        //2332 2331 2304 2365
+            //        //Setting these to all the same value just breaks chain
+            //        //if (j == 78)
+            //        //{
+            //        //    //d.data[j] = 2365; //Let's try and force a weird chain!
+            //        //}
+            //        //Explodey buildings / people happens between 40 and 50
+            //        if (j < 40|| j > 80)
+            //        {
+            //            continue;//d.data[j] = 2365; //Let's try and force a weird chain!
+            //        }
+
+            //        if (d.data[j] > 0)
+            //        {
+            //            nonZero[j] = true;
+            //        }
+            //        //THINGS I HAVE SEEN SETTING THIS RANDOMLY when j < 40
+            //        //All pedestrians instantly die, some explode?!
+            //        //Some buildings seem to be projected to infinity
+            //        //Game hangs when looking at certain objects
+            //        //Vehicles go fullbright?
+            //        //Vehcile spawning into different position?!
+            //        //Vehicles in the air!
+
+            //        //Things i have seen when j > 40
+            //        //I've finally changed the shape of the minimap polys!
+            //        //I've MOVED the entire poly to different places, too...
+            //        //Thoughts: It seems to change which vertices are connected
+            //        //but doesn't MOVE those vertices, except as a whole unit
+            //        //So the vertex positions are a different data struct.
+            //       // d.data[j] = (ushort)(Random.value * 4096);
+            //    }
+            //    dataBlockD[i] = d;
+            //}
+
+            WriteData<DataBlockD>(writer, ref dataBlockD, zeroSubBlockDData);
+        }
     }
 }

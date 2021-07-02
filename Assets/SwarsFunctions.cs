@@ -2,6 +2,8 @@
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+
 public class SwarsFunctions
 {
     public static T ByteToType<T>(BinaryReader reader)
@@ -15,11 +17,34 @@ public class SwarsFunctions
         return theStructure;
     }
 
+    public static void WriteType<T>(BinaryWriter writer, T type, bool forceBlank = false)
+    {
+        int dataSize    = Marshal.SizeOf(type);
+        IntPtr ptr      = Marshal.AllocHGlobal(dataSize);
+        byte[] dataBuff = new byte[dataSize];
+        if(!forceBlank)
+        {
+            Marshal.StructureToPtr(type, ptr, true);
+            Marshal.Copy(ptr, dataBuff, 0, dataSize);
+        }
+
+        writer.Write(dataBuff);
+    }
+
+
     public static void ReadUnknownData(BinaryReader source, ref List<short> dest, int count)
     {
         for (int i = 0; i < count; ++i)
         {
             dest.Add(source.ReadInt16()); //???
+        }
+    }
+
+    public static void WriteData<T>(BinaryWriter writer, ref List<T> type, bool forceBlank = false)
+    {
+        foreach (T data in type)
+        {
+            WriteType<T>(writer, data, forceBlank);
         }
     }
 
@@ -29,6 +54,11 @@ public class SwarsFunctions
         {
             dest.Add(ByteToType<T>(source));
         }
+    }
+
+    public static void WriteTag(BinaryWriter writer, short tag)
+    {
+        writer.Write(tag);
     }
 
     public static bool VerifyTag(BinaryReader reader, short expectedValue)

@@ -3,48 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 
-public class TextureLoader// : MonoBehaviour
-{
-    //[SerializeField]
-    //Material materialPrototype = null;
-
-    //[SerializeField]
-    //List<Texture2D> loadedTextures = new List<Texture2D>();
-
-    //[SerializeField]
-    //List<Material> loadedMaterials = new List<Material>();
-    // Start is called before the first frame update
-    //void Start()
-    //{
-    //    CreateTexture("TEX00.DAT", "PAL0.DAT", 256, 256);
-    //    CreateTexture("TEX01.DAT", "PAL0.DAT", 256, 256);
-    //    CreateTexture("TEX02.DAT", "PAL0.DAT", 256, 256);
-    //    CreateTexture("TEX03.DAT", "PAL0.DAT", 256, 256);
-    //    CreateTexture("TEX04.DAT", "PAL0.DAT", 256, 256);
-
-    //    if (loadedTextures.Count > 0)
-    //    {
-    //        GameObject textureObj = new GameObject("Textures");
-    //        textureObj.transform.parent = this.transform;
-
-    //        for (int i = 0; i < loadedTextures.Count; ++i)
-    //        {
-    //            GameObject o = GameObject.CreatePrimitive(PrimitiveType.Quad);
-    //            o.transform.parent = textureObj.transform;
-
-    //            o.transform.localPosition = new Vector3(i * 2, 0, 0);
-
-    //            Material m = new Material(materialPrototype);
-    //            m.mainTexture = loadedTextures[i];
-
-    //            loadedMaterials.Add(m);
-
-    //            o.GetComponent<MeshRenderer>().material = m;
-    //        }
-    //    }
-    //}
-
-    
+public class TextureLoader
+{    
     public static Texture2D CreateTexture(string filename, string paletteName, int width, int height)
     {
         filename    = "Assets/GAME/DATA/" + filename;
@@ -86,6 +46,5 @@ public class TextureLoader// : MonoBehaviour
         newTex.Apply();
         newTex.name = filename;
         return newTex;
-       // loadedTextures.Add(newTex);
     }
 }

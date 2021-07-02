@@ -158,6 +158,10 @@ MonoBehaviour:
   textureMaterial: {fileID: 2100000, guid: e0dc16a9ee2726b4c93f50598de63032, type: 2}
   loadedVehicles: []
   loadedMaps: []
+  mapToLoad: 32
+  loadRange: 1
+  firstRange: 0
+  lastRange: 80
 --- !u!4 &179812542
 Transform:
   m_ObjectHideFlags: 0

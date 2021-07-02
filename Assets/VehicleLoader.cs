@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 
-public class VehicleLoader// : MonoBehaviour
+public class VehicleLoader
 {
     public static void LoadVehicles(string filename, ref List<Mesh> allMeshes)
     {
