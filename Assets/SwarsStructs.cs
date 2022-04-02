@@ -538,4 +538,13 @@ namespace SWars
         public short zEnd;
         public short unknown1;
     };
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    public struct TABFileEntry
+    {
+        public uint offset;
+        public byte width;
+        public byte height;
+    }
 }

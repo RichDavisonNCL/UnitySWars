@@ -78,22 +78,22 @@ public class MapLoader
     bool zeroTris               = false;
     bool zeroQuads              = false;
     bool zeroMeshes             = false;
-    bool zeroLightInfo          = false;
-    bool zeroLightDetail        = false;
-    bool zeroBytes01            = false;
-    bool zeroBytes02            = false;
-    bool zeroBytes04            = false;
-    bool zeroBytes05            = false;
-    bool zeroBytes06            = false;
-    bool zeroBytes07            = false;
-    bool zeroBytes08            = false;
-    bool zeroBytes09            = false;
-    bool zeroBytes10            = false;
-    bool zeroBytes13            = false;
-    bool zeroBytes14            = false;
-    bool zeroBytes15            = false;
-    bool zeroBytes16            = false; 
-    bool zeroBytes17            = false;
+    bool zeroLightInfo          = true;
+    bool zeroLightDetail        = true;
+    bool zeroBytes01            = true;
+    bool zeroBytes02            = true;
+    bool zeroBytes04            = true;
+    bool zeroBytes05            = true;
+    bool zeroBytes06            = true;
+    bool zeroBytes07            = true;
+    bool zeroBytes08            = true;
+    bool zeroBytes09            = true;
+    bool zeroBytes10            = true;
+    bool zeroBytes13            = true;
+    bool zeroBytes14            = true;
+    bool zeroBytes15            = true;
+    bool zeroBytes16            = true; 
+    bool zeroBytes17            = true;
     bool zeroBlockIData         = false;
     bool zeroBlockKData         = false;
     bool zeroVehicleNavPoints   = false;
@@ -113,12 +113,15 @@ public class MapLoader
     bool zeroSubHeaderD         = false;
     bool zeroSubBlockDData      = false;
 
+
+
     public GameObject LoadMap(string filename, Material[] materialSet)
     {
         if(!File.Exists(filename))
         {
             return null;
         }
+
         file = filename;
         using (BinaryReader reader = new BinaryReader(File.Open(filename, FileMode.Open)))
         {
@@ -174,6 +177,8 @@ public class MapLoader
             return o;
         }
     }
+
+
 
     void LoadTerrainData(BinaryReader reader)
     {
@@ -250,7 +255,25 @@ public class MapLoader
             float zPos = block.y * 256;
             zPos += block.subY;// * 8;
 
-            o.transform.position = new Vector3(xPos, 0, zPos);
+            float yOffset = 0.0f;
+
+            MeshRenderer r = o.GetComponent<MeshRenderer>();
+
+            Texture2D spriteTex = null;
+            SWarsLoader.tempSpriteLookup.TryGetValue(block.spritenum, out spriteTex);
+
+            if (spriteTex)
+            {
+                r.material.mainTexture = spriteTex;
+
+                o.transform.localScale = new Vector3(spriteTex.width, spriteTex.height, 1) * 8;
+
+                yOffset += spriteTex.height * 8.0f * 0.5f;
+            }
+
+            o.transform.position = new Vector3(xPos, yOffset, zPos);
+
+            o.AddComponent<BillBoard>();
         }
     }
     GameObject CreateMapMesh(string filename, Material[] matSet)
@@ -353,6 +376,8 @@ public class MapLoader
             buildings.Add(o);
 
         }
+        bool[] vertsUsed = new bool[header.numVerts];
+
         for (int i = 0; i < header.numMeshes; ++i)
         {
             List<Vector3> meshVertices  = new List<Vector3>();
@@ -380,6 +405,10 @@ public class MapLoader
                    // Debug.Log("incorrect texnum " + layer);
                     layer = 0;
                 }
+
+                vertsUsed[tri.vert0Index] = true;
+                vertsUsed[tri.vert1Index] = true;
+                vertsUsed[tri.vert2Index] = true;
 
                 meshIndices[layer].Add(meshVertices.Count);
                 meshIndices[layer].Add(meshVertices.Count + 2);
@@ -414,6 +443,11 @@ public class MapLoader
                 meshTexCoords.Add(new Vector2(quadUV.v2x, quadUV.v2y) / 255.0f);
                 meshTexCoords.Add(new Vector2(quadUV.v3x, quadUV.v3y) / 255.0f);
                 meshTexCoords.Add(new Vector2(quadUV.v4x, quadUV.v4y) / 255.0f);
+
+                vertsUsed[quad.vert0Index] = true;
+                vertsUsed[quad.vert1Index] = true;
+                vertsUsed[quad.vert2Index] = true;
+                vertsUsed[quad.vert2Index] = true;
 
                 meshVertices.Add(new Vector3(vertices[quad.vert0Index].x, vertices[quad.vert0Index].y, vertices[quad.vert0Index].z));
                 meshVertices.Add(new Vector3(vertices[quad.vert1Index].x, vertices[quad.vert1Index].y, vertices[quad.vert1Index].z));
@@ -531,39 +565,39 @@ public class MapLoader
         int max1 = 0;
         int max2 = 0;
 
-        //List<ushort> allTes3 = new List<ushort>();
-        List<ushort> allTest = new List<ushort>();
-        HashSet<ushort> allTest2 = new HashSet<ushort>();
+        ////List<ushort> allTes3 = new List<ushort>();
+        //List<ushort> allTest = new List<ushort>();
+        //HashSet<ushort> allTest2 = new HashSet<ushort>();
 
-        for(int i = 0; i < lightInfo.Count; ++i)
-        {
+        //for(int i = 0; i < lightInfo.Count; ++i)
+        //{
 
-            max0 = Mathf.Max(max0, lightInfo[i].unknown1);
-            max1 = Mathf.Max(max1, lightInfo[i].lightDetailID);
-            max2 = Mathf.Max(max2, lightInfo[i].unknown3);
+        //    max0 = Mathf.Max(max0, lightInfo[i].unknown1);
+        //    max1 = Mathf.Max(max1, lightInfo[i].lightDetailID);
+        //    max2 = Mathf.Max(max2, lightInfo[i].unknown3);
 
-            LightInfo info = lightInfo[i];
-            info.unknown1 = (ushort)(Random.value * 4096);
-            info.unknown1 = 65535;
-            info.unknown1 = 4;
+        //    LightInfo info = lightInfo[i];
+        //    info.unknown1 = (ushort)(Random.value * 4096);
+        //    info.unknown1 = 65535;
+        //    info.unknown1 = 4;
 
-            int testX = info.unknown3 / 128;
-            int testY = info.unknown3 % 128;
+        //    int testX = info.unknown3 / 128;
+        //    int testY = info.unknown3 % 128;
 
-            //GameObject o            = new GameObject();
-            //o.transform.position    = new Vector3(testX * 32, 0, testY * 32);
+        //    //GameObject o            = new GameObject();
+        //    //o.transform.position    = new Vector3(testX * 32, 0, testY * 32);
 
-            if (info.unknown3 != 0)
-            {
-                allTest.Add(info.unknown3);
-                if(!allTest2.Add(info.unknown3))
-                {
-                    Debug.Log("Unknown3 is NOT UNIQUE"); //Seems like it is! LOL NO
-                }
-            }
+        //    if (info.unknown3 != 0)
+        //    {
+        //        allTest.Add(info.unknown3);
+        //        if(!allTest2.Add(info.unknown3))
+        //        {
+        //            Debug.Log("Unknown3 is NOT UNIQUE"); //Seems like it is! LOL NO
+        //        }
+        //    }
 
-            lightInfo[i] = info;
-        }
+        //    lightInfo[i] = info;
+        //}
    
         Debug.Log("Light info ranges: " + max0 + " , " + max1 + " , " + max2 + ". Light Detail Count: " + lightDetail.Count);
     }
@@ -734,7 +768,45 @@ public class MapLoader
         {
             WriteType<MapHeader>(writer, header, zeroHeader);
 
-            WriteData<TerrainInfo>(writer, ref terrainData, zeroTerrainInfo);
+            for(int i = 0; i < quads.Count; ++i)
+            {
+                Quad q = quads[i];
+                q.unknown1 = 0; //Makes the building go a funny colour?
+                //q.unknown2 = 0; //goes black?
+                ////q.unknown3 = 0;
+                q.unknown4 = 0;
+                q.unknown5 = 0;
+                q.unknown6 = 0;
+                q.unknown7 = 0;
+                ////q.unknown8 = 0;
+
+                q.unknownStructure1Index = 0;
+                q.unknownStructure4Index = 0;
+
+                quads[i] = q;
+            }
+
+            for (int i = 0; i < tris.Count; ++i)
+            {
+                Tri t = tris[i];
+
+                t.unknown1 = 0;
+                t.unknown2 = 0; 
+                t.unknown3 = 0;
+                t.unknown4 = 0;
+                t.unknown5 = 0;
+                t.unknown6 = 0;
+                //t.unknown7 = 0;
+                //t.unknown8 = 0;
+                //t.unknown9 = 0;
+                t.unknown10 = 0;
+                t.unknown11 = 0;
+                t.unknown12 = 0;
+                tris[i] = t;
+            }
+
+
+                WriteData<TerrainInfo>(writer, ref terrainData, zeroTerrainInfo);
 
             WriteTag(writer, 0x00);
             WriteData<QuadTextureInfo>(writer, ref quadTexInfo, zeroQuadTexInfo);
@@ -744,6 +816,23 @@ public class MapLoader
             WriteData<TriTextureInfo>(writer, ref triTexInfo, zeroTriTexInfo);
             WriteData<short>(writer, ref bytes02, zeroBytes02);
 
+            for (int i = 0; i < vertices.Count; ++i)
+            {
+                Vertex v = vertices[i];
+                //v.unknown1 = 0;
+                //v.unknown2 = 0;
+                //v.unknown2 = (ushort)(Random.Range(0.0f, 1.0f) * 32768.0f);
+                v.x = (short)(i * 129);
+                v.y = (short)(i * 129);
+                //v.x += (short)(Random.Range(-1.0f, 1.0f) * 512.0f);
+                //v.y += (short)(Random.Range(-1.0f, 1.0f) * 128.0f);
+                //v.z += (short)(Random.Range(-1.0f, 1.0f) * 512.0f);
+                //v.z = 64; //vertices at 0 never draw?
+                // v.
+
+                vertices[i] = v;
+            }
+
             WriteTag(writer, 0x02);
             WriteData<Vertex>(writer, ref vertices, zeroVertices);
             WriteData<short>(writer, ref bytes04, zeroBytes04);
@@ -752,10 +841,18 @@ public class MapLoader
             WriteData<Tri>(writer, ref tris, zeroTris);
             WriteData<short>(writer, ref bytes05, zeroBytes05);
 
-            for(int i = 0; i < meshes.Count; ++i)
+            for (int i = 0; i < meshes.Count; ++i)
             {
                 MeshDetails m = meshes[i];
-                m.noClip = 256;
+                //m.unknown1 = 0;
+                //m.unknown3 = 0;
+                //m.unknown5 = 0;
+                //m.unknown6 = 0;
+                //m.unknown10 = 0;
+                //m.unknown11 = 0;
+                //m.unknown12 = 0;
+
+                //m.noClip = 0;
                 meshes[i] = m;
             }
 
@@ -800,6 +897,19 @@ public class MapLoader
             WriteData<NPCNavPoint>(writer, ref navPoints, zeroNavPoints);
             WriteData<short>(writer, ref bytes16, zeroBytes16);
 
+            //for(int i = 0; i < blockLines.Count; ++i)
+            //{
+            //    NPCBlockLine b = blockLines[i];
+
+            //    b.xStart    += (short)(Random.Range(-1, 1) * 4096.0f);
+            //    b.xEnd      += (short)(Random.Range(-1, 1) * 4096.0f);
+
+            //    b.zStart    += (short)(Random.Range(-1, 1) * 4096.0f);
+            //    b.zEnd      += (short)(Random.Range(-1, 1) * 4096.0f);
+
+            //    blockLines[i] = b;
+            //}
+
             WriteTag(writer, 0x0D);
             WriteData<NPCBlockLine>(writer, ref blockLines, zeroBlockLines);
             WriteData<short>(writer, ref bytes17, zeroBytes17);
@@ -811,6 +921,45 @@ public class MapLoader
             WriteData<DataBlockQ>(writer, ref blockQData, zeroBlockQData);
 
             WriteTag(writer, 0x10);
+            //for(int i = 0; i < blockRData.Count; ++i)
+            //{
+            //    DataBlockR r = blockRData[i];
+
+            //    if(r.unknown1 != 0)
+            //    {
+            //        r.unknown1 += (ushort)(Random.Range(-1, 1) * 4096.0f);
+            //    }
+            //    if (r.unknown2 != 0)
+            //    {
+            //        r.unknown2 += (ushort)(Random.Range(-1, 1) * 4096.0f);
+            //    }
+            //    if (r.unknown3 != 0)
+            //    {
+            //        r.unknown3 += (ushort)(Random.Range(-1, 1) * 4096.0f);
+            //    }
+            //    if (r.unknown4 != 0)
+            //    {
+            //        r.unknown4 += (ushort)(Random.Range(-1, 1) * 4096.0f);
+            //    }
+            //    if (r.unknown5 != 0)
+            //    {
+            //        r.unknown5 += (ushort)(Random.Range(-1, 1) * 4096.0f);
+            //    }
+            //    if (r.unknown6 != 0)
+            //    {
+            //        r.unknown6 += (ushort)(Random.Range(-1, 1) * 4096.0f);
+            //    }
+            //    if (r.unknown7 != 0)
+            //    {
+            //        r.unknown7 += (ushort)(Random.Range(-1, 1) * 4096.0f);
+            //    }
+            //    if (r.unknown8 != 0)
+            //    {
+            //        r.unknown8 += (ushort)(Random.Range(-1, 1) * 4096.0f);
+            //    }
+
+            //    blockRData[i] = r;
+            //}
             WriteData<DataBlockR>(writer, ref blockRData, zeroBlockRData);
 
             WriteTag(writer, 0x11);
@@ -848,64 +997,70 @@ public class MapLoader
                 testNumbers[i] = new List<int>();
             }
             //Definitely related to buildings etc - randomly removing removes building parts
-            //for (int i = 0; i < dataBlockD.Count; ++i)
-            //{
-            //    DataBlockD d = dataBlockD[i];
+            for (int i = 0; i < dataBlockD.Count; ++i)
+            {
+                DataBlockD d = dataBlockD[i];
+                ////d.data[31] = 2;
+                //d.data[33] = 2;
+                //d.data[1] = 2;
 
-            //    for(int j = 0; j < 84; ++j)
-            //    {                   
-            //        testNumbers[j].Add(d.data[j]);
+                //d.data[76] = 2;
+                //d.data[77] = 2;
 
-            //        if(j == 1 || j == 76 || j == 77)
-            //        {
-            //            continue; //these relate to IDs, let's leave them alone...
-            //        }
-            //        //setting 31 to 0 makes them disappear from 3d and map view
-            //        //They look like indices into something or other...
-            //        //Forcing to 1 value makes 1 building appear in 3D. some others show in minimap?
-            //        if(j == 31)
-            //        {
-            //            continue;
-            //        }
+                //    for(int j = 0; j < 84; ++j)
+                //    {                   
+                //        testNumbers[j].Add(d.data[j]);
 
-            //        if (j == 3|| j == 7)//Setting these to zero removes building from 3D view, not minimap
-            //        {
-            //            continue;
-            //        }
-            //        //2332 2331 2304 2365
-            //        //Setting these to all the same value just breaks chain
-            //        //if (j == 78)
-            //        //{
-            //        //    //d.data[j] = 2365; //Let's try and force a weird chain!
-            //        //}
-            //        //Explodey buildings / people happens between 40 and 50
-            //        if (j < 40|| j > 80)
-            //        {
-            //            continue;//d.data[j] = 2365; //Let's try and force a weird chain!
-            //        }
+                //        if(j == 1 || j == 76 || j == 77)
+                //        {
+                //            continue; //these relate to IDs, let's leave them alone...
+                //        }
+                //        //setting 31 to 0 makes them disappear from 3d and map view
+                //        //They look like indices into something or other...
+                //        //Forcing to 1 value makes 1 building appear in 3D. some others show in minimap?
+                //        if(j == 31)
+                //        {
+                //            continue;
+                //        }
 
-            //        if (d.data[j] > 0)
-            //        {
-            //            nonZero[j] = true;
-            //        }
-            //        //THINGS I HAVE SEEN SETTING THIS RANDOMLY when j < 40
-            //        //All pedestrians instantly die, some explode?!
-            //        //Some buildings seem to be projected to infinity
-            //        //Game hangs when looking at certain objects
-            //        //Vehicles go fullbright?
-            //        //Vehcile spawning into different position?!
-            //        //Vehicles in the air!
+                //        if (j == 3|| j == 7)//Setting these to zero removes building from 3D view, not minimap
+                //        {
+                //            continue;
+                //        }
+                //        //2332 2331 2304 2365
+                //        //Setting these to all the same value just breaks chain
+                //        //if (j == 78)
+                //        //{
+                //        //    //d.data[j] = 2365; //Let's try and force a weird chain!
+                //        //}
+                //        //Explodey buildings / people happens between 40 and 50
+                //        if (j < 40|| j > 80)
+                //        {
+                //            continue;//d.data[j] = 2365; //Let's try and force a weird chain!
+                //        }
 
-            //        //Things i have seen when j > 40
-            //        //I've finally changed the shape of the minimap polys!
-            //        //I've MOVED the entire poly to different places, too...
-            //        //Thoughts: It seems to change which vertices are connected
-            //        //but doesn't MOVE those vertices, except as a whole unit
-            //        //So the vertex positions are a different data struct.
-            //       // d.data[j] = (ushort)(Random.value * 4096);
-            //    }
-            //    dataBlockD[i] = d;
-            //}
+                //        if (d.data[j] > 0)
+                //        {
+                //            nonZero[j] = true;
+                //        }
+                //        //THINGS I HAVE SEEN SETTING THIS RANDOMLY when j < 40
+                //        //All pedestrians instantly die, some explode?!
+                //        //Some buildings seem to be projected to infinity
+                //        //Game hangs when looking at certain objects
+                //        //Vehicles go fullbright?
+                //        //Vehcile spawning into different position?!
+                //        //Vehicles in the air!
+
+                //        //Things i have seen when j > 40
+                //        //I've finally changed the shape of the minimap polys!
+                //        //I've MOVED the entire poly to different places, too...
+                //        //Thoughts: It seems to change which vertices are connected
+                //        //but doesn't MOVE those vertices, except as a whole unit
+                //        //So the vertex positions are a different data struct.
+                //       // d.data[j] = (ushort)(Random.value * 4096);
+                //    }
+                dataBlockD[i] = d;
+            }
 
             WriteData<DataBlockD>(writer, ref dataBlockD, zeroSubBlockDData);
         }

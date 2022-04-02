@@ -159,7 +159,7 @@ MonoBehaviour:
   loadedVehicles: []
   loadedMaps: []
   mapToLoad: 32
-  loadRange: 1
+  loadRange: 0
   firstRange: 0
   lastRange: 80
 --- !u!4 &179812542
