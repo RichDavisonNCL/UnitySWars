@@ -547,4 +547,33 @@ namespace SWars
         public byte width;
         public byte height;
     }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    public struct STAFileEntry
+    {
+        public ushort index;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    public struct FRAFileEntry
+    {
+        public ushort firstElement;
+        public byte width;
+        public byte height;
+        public ushort flags;
+        public ushort nextFrame;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    public struct ELEFileEntry
+    {
+        public ushort sprite;
+        public short xOffset;
+        public short yOffset;
+        public ushort xFlipped;
+        public ushort next;
+    }
 }

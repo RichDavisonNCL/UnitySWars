@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 public class SWarsLoader : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class SWarsLoader : MonoBehaviour
 
     [SerializeField]
     List<Texture2D> uiTextures;
+
+    [SerializeField]
+    List<Texture2D> spriteFrameTextures;
 
     [SerializeField]
     Material mapMaterial;
@@ -42,14 +46,22 @@ public class SWarsLoader : MonoBehaviour
 
     static public Dictionary<int, Texture2D> tempSpriteLookup; //I got these through inspection, must have a proper definition somewhere!
 
+
+    static public List<SWars.STAFileEntry> staEntries = new List<SWars.STAFileEntry>();
+    static public List<SWars.FRAFileEntry> fraEntries = new List<SWars.FRAFileEntry>();
+    static public List<SWars.ELEFileEntry> eleEntries = new List<SWars.ELEFileEntry>();
+
+
     void Start()
     { 
         LoadTextures();       
         LoadSprites();
         CreateSpriteLookup();
         LoadVehicles();
-        LoadMaps(); 
+        LoadMaps();
 
+        LoadAnimStates();
+        LoadAnimFrames();
     }
 
     void CreateSpriteLookup()
@@ -93,6 +105,12 @@ public class SWarsLoader : MonoBehaviour
     void LoadSprites()
     {
         TextureLoader.CreateSprites("MSPR-0", "PAL0.DAT", ref spriteTextures);
+
+        //TextureLoader.CreateSprites("MSPR-1", "PAL0.DAT", ref spriteTextures);
+        //TextureLoader.CreateSprites("MSPR-2", "PAL0.DAT", ref spriteTextures);
+        //TextureLoader.CreateSprites("MSPR-3", "PAL0.DAT", ref spriteTextures);
+        //TextureLoader.CreateSprites("MSPR-4", "PAL0.DAT", ref spriteTextures);
+        //TextureLoader.CreateSprites("MSPR-5", "PAL0.DAT", ref spriteTextures);
 
         TextureLoader.CreateSprites("POP0-1", "PAL0.DAT", ref uiTextures);
         TextureLoader.CreateSprites("POP1-1", "PAL0.DAT", ref uiTextures);
@@ -237,5 +255,154 @@ public class SWarsLoader : MonoBehaviour
        GameObject map = mapA.LoadMap(name, mapMats);
 
         return map;
+    }
+
+    void LoadAnimStates()
+    {
+        string staFile = "Assets/GAME/DATA/MSTA-0.ANI";
+        string fraFile = "Assets/GAME/DATA/MFRA-0.ANI";
+        string eleFile = "Assets/GAME/DATA/MELE-0.ANI";
+
+        staEntries = new List<SWars.STAFileEntry>();
+        fraEntries = new List<SWars.FRAFileEntry>();
+        eleEntries = new List<SWars.ELEFileEntry>();
+
+        using (BinaryReader reader = new BinaryReader(File.Open(staFile, FileMode.Open)))
+        {
+            while (reader.BaseStream.Position != reader.BaseStream.Length)
+            {
+                staEntries.Add(SwarsFunctions.ByteToType<SWars.STAFileEntry>(reader));
+            }
+        }
+
+        using (BinaryReader reader = new BinaryReader(File.Open(fraFile, FileMode.Open)))
+        {
+            while (reader.BaseStream.Position != reader.BaseStream.Length)
+            {
+                fraEntries.Add(SwarsFunctions.ByteToType<SWars.FRAFileEntry>(reader));
+            }
+        }
+
+        using (BinaryReader reader = new BinaryReader(File.Open(eleFile, FileMode.Open)))
+        {
+            while (reader.BaseStream.Position != reader.BaseStream.Length)
+            {
+                eleEntries.Add(SwarsFunctions.ByteToType<SWars.ELEFileEntry>(reader));
+            }
+        }
+
+    }
+
+    void LoadAnimFrames()
+    {
+        int f = 0;
+
+        foreach(SWars.STAFileEntry e in staEntries)
+        {
+            int index = e.index;
+            if(index == 0)
+            {
+                continue;
+            }
+
+            SWars.FRAFileEntry frameData = fraEntries[index];
+
+            Texture2D newTex = new Texture2D(frameData.width , frameData.height );
+            newTex.alphaIsTransparency = true;
+            newTex.name = "Sprite Texture " + f; //21 is the interesting one!
+            newTex.filterMode = FilterMode.Point;
+            SWars.ELEFileEntry element = SWarsLoader.eleEntries[frameData.firstElement];
+
+            //GameObject debugObject      = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            //SwarsSpriteDebug debugger   = debugObject.AddComponent<SwarsSpriteDebug>();
+
+            //debugObject.name = "Sprite " + f;
+            //debugger.entry = e;
+            //debugger.frame = frameData;
+
+            while(true)
+            {
+                if(element.sprite % 6 != 0)
+                {
+                    Debug.LogError("Invalid sprite ID not modulo 6!");
+                }
+                int spriteID = element.sprite / 6; //???? got the divide from freesynd source. don't know why?
+
+                if (spriteID >= spriteTextures.Count)
+                {
+                    Debug.LogWarning("Sprite element has invalid sprite id " + spriteID);
+                    break;
+                }
+                Texture2D eleTex = spriteTextures[spriteID];
+
+                BlitTexture(eleTex, newTex, element);
+
+                //debugger.spriteSet.Add(eleTex);
+                //debugger.elements.Add(element);
+
+                if(element.next == 0)
+                {
+                    break;
+                }
+                element = SWarsLoader.eleEntries[element.next];
+            }
+            spriteFrameTextures.Add(newTex);
+            f++;
+        }
+
+        Debug.Log("Created " + f + " individual sprite frames");
+
+        VisualiseTextureSet(ref spriteFrameTextures, "SpriteFrameTextures");
+    }
+
+    void BlitTexture(Texture2D src, Texture2D dst, SWars.ELEFileEntry entry)
+    {
+        float midX = dst.width * 0.5f;
+        float midY = dst.height * 0.5f;
+
+        int xStart = (int)midX + (entry.xOffset / 2);
+        int yStart = (int)midY + (entry.yOffset / 2);
+
+        yStart += src.height;
+        yStart = dst.height - yStart;
+
+        for(int y = 0; y < src.height; ++y)
+        {
+            int yWrite = yStart + y;
+
+            if(yWrite < 0)
+            {
+                continue;
+            }
+            if(yWrite >= dst.height)
+            {
+                break;
+            }
+
+            for(int x = 0; x < src.width; ++x)
+            {
+                int xWrite = xStart + x;
+                int xRead = x;
+                if((entry.xFlipped & 1) != 0)
+                {
+                    xRead = (src.width - 1) - x;
+                }
+                if (xWrite < 0)
+                {
+                    continue;
+                }
+                if (xWrite >= dst.width)
+                {
+                    break;
+                }
+                Color c = src.GetPixel(xRead, y);
+                if(c.a < 0.01f)
+                {
+                    continue;
+                }
+                dst.SetPixel(xWrite, yWrite, c);
+            }
+        }
+        dst.Apply();
     }
 }

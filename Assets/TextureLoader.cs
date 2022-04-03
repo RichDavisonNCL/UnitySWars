@@ -131,7 +131,8 @@ public class TextureLoader
             float r = palette[(i * 3) + 0] / 255.0f;
             float g = palette[(i * 3) + 1] / 255.0f;
             float b = palette[(i * 3) + 2] / 255.0f;
-            paletteColours[i] = new Color(r, g, b);
+            float a = i == 0 ? 0.0f : 1.0f;
+            paletteColours[i] = new Color(r, g, b, a);
         }
         return paletteColours;
     }
@@ -140,15 +141,18 @@ public class TextureLoader
     {
         Texture2D newTex = new Texture2D(width, height);
 
-        for (int y = 0; y < height; ++y)
+        for (int y = 0; y < height; ++y) 
         {
             for (int x = 0; x < width; ++x)
             {
                 int pixIndex = (y * width) + x;
+                //int pixIndex = ((height - 1 - y) * width) + x;
+
                 newTex.SetPixel(x, y, paletteData[texData[pixIndex]]);
             }
         }
         newTex.filterMode = FilterMode.Point;
+        newTex.alphaIsTransparency = true;
         newTex.Apply();
         newTex.name = name;
         return newTex;
