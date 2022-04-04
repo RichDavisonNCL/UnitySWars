@@ -576,4 +576,43 @@ namespace SWars
         public ushort xFlipped;
         public ushort next;
     }
+
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    public struct UIMapCoordinate
+    {
+        public ushort x;
+        public ushort y;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    struct UICItyData
+    {
+        public char a;
+        public ushort x;   //something to do with y pos
+        public ushort y;
+
+        public char missionID;
+
+        public ushort unknown4;    //0 or 5?
+        public ushort unknown5;
+        public ushort unknown6;
+        public ushort unknown7;
+        public ushort unknown8;
+        public ushort unknown9;
+        public ushort unknown10;
+
+        public ushort unknown11;       //num b
+        public ushort unknown12;       //
+        public ushort unknown13;       //usually 65535
+        public ushort unknown14;       //usually 65535
+        public ushort unknown15;       //num a
+        public ushort unknown16;       //0
+        public ushort unknown17;       //num a	
+        public ushort unknown18;       //0
+        public ushort unknown19;       //num
+        public ushort unknown20;       //num
+    };
 }

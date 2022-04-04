@@ -113,9 +113,9 @@ public class MapLoader
     bool zeroSubHeaderD         = false;
     bool zeroSubBlockDData      = false;
 
+    float[,] vHeights;
 
-
-    public GameObject LoadMap(string filename, Material[] materialSet)
+    public GameObject LoadMap(string filename, Material[] worldMatSet, Material spriteMat)
     {
         if(!File.Exists(filename))
         {
@@ -138,7 +138,7 @@ public class MapLoader
             LoadUnknownData(reader);
             LoadSpriteData(reader);
 
-            GameObject o = CreateMapMesh(filename, materialSet);
+            GameObject o = CreateMapMesh(filename, worldMatSet);
             SWarsMap mapComponent = o.AddComponent<SWarsMap>();
             mapComponent.loader = this;
 
@@ -147,13 +147,13 @@ public class MapLoader
             buildingRoot.transform.parent       = o.transform;
             buildingRoot.transform.localScale   = Vector3.one;
             //Now to handle any buildings!
-            CreateBuildingMeshes(buildingRoot, materialSet);
+            CreateBuildingMeshes(buildingRoot, worldMatSet);
 
             GameObject spritesRoot = new GameObject();
             spritesRoot.name = "Sprites";
             spritesRoot.transform.parent        = o.transform;
             spritesRoot.transform.localScale    = Vector3.one;
-            CreateSprites(spritesRoot);
+            CreateSprites(spritesRoot, spriteMat);
 
             GameObject blockLines = new GameObject();
             blockLines.name = "BlockLines";
@@ -182,11 +182,16 @@ public class MapLoader
 
     void LoadTerrainData(BinaryReader reader)
     {
+        vHeights = new float[128,128];
         for (int x = 0; x < 128; ++x)
         {
             for (int y = 0; y < 128; ++y)
             {
-                terrainData.Add(SwarsFunctions.ByteToType<SWars.TerrainInfo>(reader));
+                SWars.TerrainInfo t = SwarsFunctions.ByteToType<SWars.TerrainInfo>(reader);
+
+                vHeights[y, x] = t.vertexHeight / 32.0f; //Transposed!
+
+                terrainData.Add(t);
             }
         }
     }
@@ -235,7 +240,7 @@ public class MapLoader
         setup.BuildConnections();
     }
 
-    void CreateSprites(GameObject gameObject)
+    void CreateSprites(GameObject gameObject, Material spriteMat)
     {
         for (int i = 0; i < entitySubBlockData.Count; ++i)
         {
@@ -255,9 +260,10 @@ public class MapLoader
             float zPos = block.y * 256;
             zPos += block.subY;// * 8;
 
-            float yOffset = 0.0f;
+            float yOffset = vHeights[(int)block.x, (int)block.y] * 256;
 
             MeshRenderer r = o.GetComponent<MeshRenderer>();
+            r.material = spriteMat;
 
             Texture2D spriteTex = null;
             SWarsLoader.tempSpriteLookup.TryGetValue(block.spritenum, out spriteTex);
@@ -268,7 +274,7 @@ public class MapLoader
 
                 o.transform.localScale = new Vector3(spriteTex.width, spriteTex.height, 1) * 8;
 
-                yOffset += spriteTex.height * 8.0f * 0.5f;
+               yOffset += spriteTex.height * 8.0f * 0.5f;
             }
 
             o.transform.position = new Vector3(xPos, yOffset, zPos);

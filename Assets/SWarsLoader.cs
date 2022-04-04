@@ -27,6 +27,9 @@ public class SWarsLoader : MonoBehaviour
     Material textureMaterial;
 
     [SerializeField]
+    Material spriteMaterial;
+
+    [SerializeField]
     List<Mesh> loadedVehicles;
 
     [SerializeField]
@@ -47,9 +50,9 @@ public class SWarsLoader : MonoBehaviour
     static public Dictionary<int, Texture2D> tempSpriteLookup; //I got these through inspection, must have a proper definition somewhere!
 
 
-    static public List<SWars.STAFileEntry> staEntries = new List<SWars.STAFileEntry>();
-    static public List<SWars.FRAFileEntry> fraEntries = new List<SWars.FRAFileEntry>();
-    static public List<SWars.ELEFileEntry> eleEntries = new List<SWars.ELEFileEntry>();
+    public List<SWars.STAFileEntry> staEntries = new List<SWars.STAFileEntry>();
+    public List<SWars.FRAFileEntry> fraEntries = new List<SWars.FRAFileEntry>();
+    public List<SWars.ELEFileEntry> eleEntries = new List<SWars.ELEFileEntry>();
 
 
     void Start()
@@ -252,7 +255,7 @@ public class SWarsLoader : MonoBehaviour
             mapMats[i].mainTexture = mapTextures[i];
         }
 
-       GameObject map = mapA.LoadMap(name, mapMats);
+       GameObject map = mapA.LoadMap(name, mapMats, spriteMaterial);
 
         return map;
     }
@@ -311,7 +314,17 @@ public class SWarsLoader : MonoBehaviour
             newTex.alphaIsTransparency = true;
             newTex.name = "Sprite Texture " + f; //21 is the interesting one!
             newTex.filterMode = FilterMode.Point;
-            SWars.ELEFileEntry element = SWarsLoader.eleEntries[frameData.firstElement];
+
+            Color[] texColours = newTex.GetPixels();
+
+            for(int i = 0; i < texColours.Length; ++i)
+            {
+                texColours[i] = Color.clear;
+            }
+            newTex.SetPixels(texColours);
+
+
+            SWars.ELEFileEntry element = eleEntries[frameData.firstElement];
 
             //GameObject debugObject      = GameObject.CreatePrimitive(PrimitiveType.Cube);
             //SwarsSpriteDebug debugger   = debugObject.AddComponent<SwarsSpriteDebug>();
@@ -344,7 +357,8 @@ public class SWarsLoader : MonoBehaviour
                 {
                     break;
                 }
-                element = SWarsLoader.eleEntries[element.next];
+
+                element = eleEntries[element.next];
             }
             spriteFrameTextures.Add(newTex);
             f++;
