@@ -20,26 +20,6 @@ public class SWarsSprite : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
-        //if(frame < 0)
-        //{
-        //    if(SWarsLoader.staEntries != null)
-        //    {
-        //        frame = SWarsLoader.staEntries[spriteID].index;
-
-        //        frameData = SWarsLoader.fraEntries[frame];
-
-        //        SWars.ELEFileEntry element = SWarsLoader.eleEntries[frameData.firstElement];
-
-        //        while(element.next != 0)
-        //        {
-        //            element = SWarsLoader.eleEntries[element.next];
-
-        //            Texture2D lol;
-        //            lol.
-        //        }
-        //    }
-        //}
-        
+    {     
     }
 }

@@ -89,13 +89,13 @@ public class SWarsUIMap : MonoBehaviour
 
     Mesh CreateCitiesMesh(string inputFile)
     {
-        List<SWars.UICItyData> loadedCities = new List<SWars.UICItyData>();
+        List<SWars.UICityData> loadedCities = new List<SWars.UICityData>();
 
         using (BinaryReader reader = new BinaryReader(File.Open(inputFile, FileMode.Open)))
         {
             while (reader.BaseStream.Position != reader.BaseStream.Length)
             {
-                loadedCities.Add(SwarsFunctions.ByteToType<SWars.UICItyData>(reader));
+                loadedCities.Add(SwarsFunctions.ByteToType<SWars.UICityData>(reader));
             }
         }
         Mesh m = new Mesh();
@@ -104,7 +104,7 @@ public class SWarsUIMap : MonoBehaviour
         List<int> meshIndices = new List<int>();
 
         int index = 0;
-        foreach (SWars.UICItyData c in loadedCities)
+        foreach (SWars.UICityData c in loadedCities)
         {
             meshCoords.Add(new Vector3(c.x , -c.y, 0));
             meshIndices.Add(index);

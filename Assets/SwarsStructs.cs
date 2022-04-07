@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace SWars
 {
@@ -10,22 +8,22 @@ namespace SWars
         public ushort always1;
         public ushort always0;
         public ushort numQuadTex;
-        public ushort numTriTex;  
+        public ushort numTriTex;
         public ushort numVerts;
-        public ushort numTris; 
+        public ushort numTris;
         public ushort numMeshes;
         public ushort numLightInfo;
         public ushort numLights;
         public ushort numBlockI;
-        public ushort numQuads; 
+        public ushort numQuads;
         public ushort numBlockK;
-        public ushort numNavPoints; 
+        public ushort numNavPoints;
         public ushort numBlockM;
         public ushort numNavPointsNPC;
         public ushort numBlockPointsNPC;
         public ushort numBlockP;
-        public ushort numBlockQ;   
-        public ushort numBlockR; 
+        public ushort numBlockQ;
+        public ushort numBlockR;
     };
     [System.Serializable]
     public struct MapSubHeaderPreamble
@@ -54,13 +52,13 @@ namespace SWars
     public struct SubHeaderB
     {
         public ushort unknown1;        //Seems to be always 4504?
-        public ushort unknown2;        
-        public ushort unknown3;       
-        public ushort unknown4;        
-        public ushort unknown5;        
+        public ushort unknown2;
+        public ushort unknown3;
+        public ushort unknown4;
+        public ushort unknown5;
         public ushort unknown6;
 
-        public ushort unknown7;      
+        public ushort unknown7;
         public ushort unknown8;
         public ushort unknown9;
         public ushort unknown10;
@@ -118,7 +116,7 @@ namespace SWars
         public ushort unknown10;       //0
         public ushort unknown11;       //num b
         public ushort unknown12;       //0
-         
+
         public ushort unknown13;       //usually 65535
         public ushort unknown14;       //usually 65535
         public ushort unknown15;       //num a
@@ -150,18 +148,18 @@ namespace SWars
         public ushort zero4;   //always 0
         public ushort always64;    //always 64
         public ushort increment2;  //increments from 65250
-         
+
         public char subXZero;
         public char subX;
-         
+
         public ushort x;
         public ushort flags;       //mostly 0, some sort of tags
         public ushort unknownTag;  //appears to be either 0 or 1, if set to 1, sprite is up in the air?
-         
+
         public char subYZero;
         public char subY;
         public ushort y;
-         
+
         public ushort unknown16;   //usually a number around 4000, 0 for smoke emitters
         public ushort spritenum;
         public ushort unknown18;   //65535 except for emitters	(then 5 in testmap)	//appears to do nothing interesting
@@ -211,7 +209,7 @@ namespace SWars
         public ushort quadIndex;               //quadVector2map index. This value may be bigger than the number of quad_uvfaces, see note (A).
         public ushort lightScale;              //unknown		//something to do with quads that ARENT lit?
         public ushort flags;                   //unknown	//flags controlled whether the sprite lights were 'on' or 'off' (or is it fullbrights?) //256 = fullbright
-        public short  vertexHeight;            //vertex height (this value must be multiplied by 8) (signed 16 bit)
+        public short vertexHeight;            //vertex height (this value must be multiplied by 8) (signed 16 bit)
         public ushort spriteNum;               //unknown
         public ushort hasBlockLine;            //quads with this > 0 contain part of a SwarsNPCeBlockLine
         public ushort lightLevel;              //base light level (0 = black, 65535 = XTREME SUNBURN)
@@ -344,7 +342,7 @@ namespace SWars
     };
     [System.Serializable]
     public struct LightInfo  //block [G] //no idea exactly what it is
-    { 
+    {
         public ushort unknown1;
         public ushort lightDetailID;
         public ushort unknown3; //A lot of 0s. Not quite sequential for others, but almost. Unique? 
@@ -352,7 +350,7 @@ namespace SWars
     [System.Serializable]
     //DEFINATELY LIGHT SOURCES
     public struct LightDetail  //block [H]
-    { 
+    {
         public ushort intensity;       //Doc says this is illumination value. Perhaps illumination radius?
         public ushort unknowna;
         public ushort unknownb;
@@ -374,7 +372,7 @@ namespace SWars
     //really unknown
     //set all these to 0, didnt seem to make any difference?
     public struct DataBlockI
-    { 
+    {
         public ushort unknown1;
         public ushort unknown2;
         public ushort unknown3;
@@ -390,7 +388,7 @@ namespace SWars
     with all these set to 0, they stop animating.
     */
     public struct DataBlockK
-    { 
+    {
         public ushort unknown1;
         public ushort unknown2;
         public ushort unknown3;
@@ -480,27 +478,27 @@ namespace SWars
     [System.Serializable]
     public enum VehicleNavPointType : ushort
     {
-        Normal      = 0,
-        Unknown1    = 1,
-        Barrier1    = 1 << 1,
-        Barrier2    = 1 << 2,
-        Crossing    = 1 << 3,
-        Junction1   = 1 << 4,
-        Junction2   = 1 << 5,
-        Unknown2    = 1 << 6,
-        Exit        = 1 << 7,
-        Entrance    = 1 << 8,
-        Water1      = 1 << 9,
-        Water2      = 1 << 10,
-        Parking     = 1 << 11,
-        EntryDest   = 1 << 12,
-        Unknown3    = 1 << 13,
-        Unknown4    = 1 << 14,
-        Barrier3    = 1 << 15//,
+        Normal = 0,
+        Unknown1 = 1,
+        Barrier1 = 1 << 1,
+        Barrier2 = 1 << 2,
+        Crossing = 1 << 3,
+        Junction1 = 1 << 4,
+        Junction2 = 1 << 5,
+        Unknown2 = 1 << 6,
+        Exit = 1 << 7,
+        Entrance = 1 << 8,
+        Water1 = 1 << 9,
+        Water2 = 1 << 10,
+        Parking = 1 << 11,
+        EntryDest = 1 << 12,
+        Unknown3 = 1 << 13,
+        Unknown4 = 1 << 14,
+        Barrier3 = 1 << 15//,
     }
     [System.Serializable]
     public struct VehicleNavPoint
-    {   
+    {
         public short x;
         public short y;
         public short z;
@@ -522,14 +520,14 @@ namespace SWars
     };
     [System.Serializable]
     public struct NPCNavPoint
-    { 
+    {
         public short lineNumber;        //NPCBlockLine number
         public short numPoints;
         public short loopNumber;
     };
     [System.Serializable]
     public struct NPCBlockLine
-    { 
+    {
         public short xStart;
         public short yStart;
         public short zStart;
@@ -578,6 +576,10 @@ namespace SWars
     }
 
 
+    /*
+     * These structs are for the 'laser' UI 
+     * The map is just line strips, with [0,0] indicating a break
+     */
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     [System.Serializable]
     public struct UIMapCoordinate
@@ -585,34 +587,173 @@ namespace SWars
         public ushort x;
         public ushort y;
     }
+    /*
+     * The last entry of this array is of the same size, but different data?
+     * It's position in the world is weird, and the value are of different ranges
+     */
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    struct UICityData
+    {
+        public byte a;          //Only map 0 (49) and map 5(4)
+        public ushort x;
+        public ushort y;
+
+        public byte mapID;      //MOST maps have this set, always a unique value. map0 [london on ui map] has 30 [london is map 30!]
+
+        public byte unknown4;   //0, 2, 3, 5, 15(once!)
+
+        public ushort unknown5;
+//These are offsets in bytes from line 1225 in the alltext.wad
+//48775 bytes into ALLTEXT.WAD - check ALLTEXT.IDX for this number?
+        public ushort cityNameOffset;
+        public ushort identikeysOffset;
+        public ushort infrastructureOffset;
+        public ushort dialectOffset;
+        public ushort commerceOffset;
+        public ushort toxicityOffset;
+
+
+        public ushort unknown12;//Only 2 maps have unknown12 not be 0, index 4 and index 49
+        public ushort unknown13;//Only map 4 has this != 0, with 270    
+        public ushort unknown14;//Only map 4 has this != 0, with 328   
+        public ushort unknown15;//Only map 4 has this != 0, with 270     
+        public ushort unknown16;//Only map 4 has this != 0, with 7      
+        public ushort unknown17;//Only map 4 has this != 0, with 25        
+        public ushort unknown18;//Only map 4 has this != 0, with 626    
+        public ushort unknown19;//Only map 4 has this != 0, with 38
+        public byte   testA;    //only map 4, value 4!
+        public ushort testB;    //only map 4, value 511!
+    };
+
+
+    /*
+     * Tomasz Lis worked out part of the mission format back in 2006!
+     */
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     [System.Serializable]
-    struct UICItyData
+    public struct MissionHeader
     {
-        public char a;
-        public ushort x;   //something to do with y pos
-        public ushort y;
+        public ushort type; //Valid file types are 9, 11, 12
+        public ushort blank;
+    };
 
-        public char missionID;
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    unsafe public struct OptionalObjectData
+    {
+        public fixed byte OPTIONAL_DATA[36];        //Optional data is avaible only is specially marked entries
+    };
 
-        public ushort unknown4;    //0 or 5?
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    unsafe public struct AdditionalObjectData
+    {
+        public fixed byte ADDITIONAL_DATA[48];        //Optional data is avaible only is specially marked entries
+    }
+
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    unsafe public struct BaseObjectData
+    {
+        public ushort unkn01;
+        public ushort unkn02;
+        public ushort obj_num1;       //looks like an object number, values are increasing
+        public ushort obj_num2;       //another object number?, values are usually increasing
+        public char type;             //Object type;determines speed, visual representation and other parameters
+        public char control_player;   //Number of player controlling the object; 3 for computer,4 for player 1
+        public ushort optional_type;  //nonzero if the entry is larger than 168
+        public ushort unkn03;         //usually zero, sometimes 4
+        public char unkn05;           //zero
+        public char unkn06;           //have influence on the game, but what it means?
+        public char unkn07;
+        public char unkn08;
+        public char unkn09;           //a copy of unkn7 ???
+        public char unkn10;           //zero ?
+        public char unkn11;
+        public char unkn12;           //zero
+        public ushort unkn14;        //zeros
+        public uint map_posx;      //map position X
+        public uint map_posz;      //map position Z (the ground plane is quite high)
+        public uint map_posy;      //map position Y
+        public ushort unkn15;        //zeros
+        public char unkn16;
+        //after some bytes, at offset 84 //WTF?
+        public ushort unkn24;        //agent number?
+        public ushort unkn25;        //zeros;agent don't exist if changed
+        public ushort unkn26;        //
+        public fixed byte unkn99[123];
+        public AdditionalObjectData additionalData;
+        public OptionalObjectData optionalData;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    unsafe public struct MissionEvent
+    {
+        public fixed byte unknown[32];
+    }
+
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    public struct MissionUnknown1Header
+    {
+        public ushort first;
+        public ushort unknown0;
+        public ushort unknown1;
+        public ushort unknown2;
+        public ushort unknown3;
+        public ushort unknown4;
         public ushort unknown5;
         public ushort unknown6;
         public ushort unknown7;
-        public ushort unknown8;
-        public ushort unknown9;
-        public ushort unknown10;
+        public char angle;
+        public ushort numEntries;
+    }
 
-        public ushort unknown11;       //num b
-        public ushort unknown12;       //
-        public ushort unknown13;       //usually 65535
-        public ushort unknown14;       //usually 65535
-        public ushort unknown15;       //num a
-        public ushort unknown16;       //0
-        public ushort unknown17;       //num a	
-        public ushort unknown18;       //0
-        public ushort unknown19;       //num
-        public ushort unknown20;       //num
-    };
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    unsafe public struct MissionUnknown1
+    {
+        public fixed byte unknown[60];
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    public struct MissionUnknown2Header
+    {
+        public ushort unknown;
+        public ushort numEntries;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    unsafe public struct MissionUnknown2
+    {
+        public fixed byte unknown[32];
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    unsafe public struct MissionUnknown3
+    {
+        public fixed byte unknown1[80];
+        public fixed byte unknown2[4400];
+        public fixed byte unknown3[4];
+    }
+
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [System.Serializable]
+    unsafe public struct MissionPlayerData
+    {
+        public byte playeridx_0;  //Human-controlled player number
+        public fixed byte order01[43];  //Looks like some kind of ordering data (players?)
+        public fixed byte player_name[40*34];
+        public fixed byte player_data[40*31];
+    }
 }

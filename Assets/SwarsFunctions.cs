@@ -17,6 +17,37 @@ public class SwarsFunctions
         return theStructure;
     }
 
+    public static T ByteToType<T>(BinaryReader reader, int forcedSize)
+    {
+        byte[] bytes = reader.ReadBytes(forcedSize);
+
+        GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+        T theStructure = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
+        handle.Free();
+
+        return theStructure;
+    }
+
+    public static void WriteType<T>(BinaryWriter writer, T type, int forceSize, bool forceBlank = false)
+    {
+        if(forceSize > Marshal.SizeOf(type))
+        {
+            bool a = true;
+        }
+        int dataSize = forceSize;
+        IntPtr ptr = Marshal.AllocHGlobal(dataSize);
+        byte[] dataBuff = new byte[dataSize];
+        if (!forceBlank)
+        {
+            Marshal.StructureToPtr(type, ptr, true);
+            Marshal.Copy(ptr, dataBuff, 0, dataSize);
+        }
+
+        writer.Write(dataBuff);
+    }
+
+
+
     public static void WriteType<T>(BinaryWriter writer, T type, bool forceBlank = false)
     {
         int dataSize    = Marshal.SizeOf(type);
