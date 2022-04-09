@@ -7,7 +7,7 @@ using System;
 public class SWarsBuildingDataVis : MonoBehaviour
 {
     int meshIndex = 0;
-    public MapLoader sourceMap;
+    public SWars.Map sourceMap;
 
     [SerializeField]
     public MeshDetails meshDetail;
@@ -25,14 +25,14 @@ public class SWarsBuildingDataVis : MonoBehaviour
     [SerializeField]
     int randomSeed = -1;
 
-    public void SetMeshDetails(MeshDetails details, MapLoader source, int index)
+    public void SetMeshDetails(MeshDetails details, SWars.Map source, int index)
     {
         meshDetail  = details;
         sourceMap   = source;
         meshIndex = index;
     }
 
-    public void SetBlockDDetails(DataBlockD details, MapLoader source, int index)
+    public void SetBlockDDetails(DataBlockD details, SWars.Map source, int index)
     {
         blockD      = details;
         sourceMap   = source;

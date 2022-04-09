@@ -231,8 +231,8 @@ public class SWarsVerify
             block.zero3 != 0 ||
             block.zero4 != 0 ||
             block.always64 != 64 ||
-            block.subXZero != 0 ||
-            block.subYZero != 0 ||
+            //block.subXZero != 0 ||
+            //block.subYZero != 0 ||
             block.zero7 != 0 ||
             block.zero8 != 0 )
         {

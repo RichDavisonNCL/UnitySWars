@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(SWarsMap))]
+[CustomEditor(typeof(SWarsMapVis))]
 public class SWarsMapEditor : Editor
 {
     public override void OnInspectorGUI()
@@ -14,8 +14,8 @@ public class SWarsMapEditor : Editor
 
         if (GUILayout.Button("Save Map"))
         {
-            SWarsMap m = (SWarsMap)target;
-            m.loader.SaveToOriginalFile();
+            SWarsMapVis m = (SWarsMapVis)target;
+            m.loadedMap.SaveToOriginalFile();
         }
     }
 }

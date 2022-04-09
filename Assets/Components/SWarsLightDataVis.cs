@@ -6,12 +6,12 @@ using SWars;
 public class SWarsLightDataVis : MonoBehaviour
 {
     int lightIndex = 0;
-    public MapLoader sourceMap;
+    public SWars.Map sourceMap;
 
     [SerializeField]
     public LightDetail lightDetail;
 
-    public void SetLightDetails(LightDetail details, MapLoader source, int index)
+    public void SetLightDetails(LightDetail details, SWars.Map source, int index)
     {
         lightDetail = details;
         sourceMap   = source;

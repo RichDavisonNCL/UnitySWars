@@ -245,7 +245,8 @@ public class SWarsLoader : MonoBehaviour
     }
     GameObject LoadMap(string name)
     {
-        MapLoader mapA = new MapLoader();
+        GameObject o    = new GameObject();
+        SWarsMapVis vis = o.AddComponent<SWarsMapVis>();
 
         Material[] mapMats = new Material[5];
 
@@ -255,9 +256,9 @@ public class SWarsLoader : MonoBehaviour
             mapMats[i].mainTexture = mapTextures[i];
         }
 
-       GameObject map = mapA.LoadMap(name, mapMats, spriteMaterial);
+        vis.LoadMap(name, mapMats, spriteMaterial);
 
-        return map;
+        return o;
     }
 
     void LoadAnimStates()
@@ -274,7 +275,7 @@ public class SWarsLoader : MonoBehaviour
         {
             while (reader.BaseStream.Position != reader.BaseStream.Length)
             {
-                staEntries.Add(SwarsFunctions.ByteToType<SWars.STAFileEntry>(reader));
+                staEntries.Add(SWars.Functions.ByteToType<SWars.STAFileEntry>(reader));
             }
         }
 
@@ -282,7 +283,7 @@ public class SWarsLoader : MonoBehaviour
         {
             while (reader.BaseStream.Position != reader.BaseStream.Length)
             {
-                fraEntries.Add(SwarsFunctions.ByteToType<SWars.FRAFileEntry>(reader));
+                fraEntries.Add(SWars.Functions.ByteToType<SWars.FRAFileEntry>(reader));
             }
         }
 
@@ -290,7 +291,7 @@ public class SWarsLoader : MonoBehaviour
         {
             while (reader.BaseStream.Position != reader.BaseStream.Length)
             {
-                eleEntries.Add(SwarsFunctions.ByteToType<SWars.ELEFileEntry>(reader));
+                eleEntries.Add(SWars.Functions.ByteToType<SWars.ELEFileEntry>(reader));
             }
         }
 

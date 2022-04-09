@@ -1,4 +1,6 @@
 ﻿using System.Runtime.InteropServices;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace SWars
 {
@@ -149,16 +151,18 @@ namespace SWars
         public ushort always64;    //always 64
         public ushort increment2;  //increments from 65250
 
-        public char subXZero;
-        public char subX;
+        public byte x0;
+        public byte x1;
+        public byte x2;
+        public byte x3;
 
-        public ushort x;
         public ushort flags;       //mostly 0, some sort of tags
         public ushort unknownTag;  //appears to be either 0 or 1, if set to 1, sprite is up in the air?
 
-        public char subYZero;
-        public char subY;
-        public ushort y;
+        public byte y0;
+        public byte y1;
+        public byte y2;
+        public byte y3;
 
         public ushort unknown16;   //usually a number around 4000, 0 for smoke emitters
         public ushort spritenum;
@@ -593,7 +597,7 @@ namespace SWars
      */
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     [System.Serializable]
-    struct UICityData
+    public struct UICityData
     {
         public byte a;          //Only map 0 (49) and map 5(4)
         public ushort x;
@@ -653,7 +657,46 @@ namespace SWars
         public fixed byte ADDITIONAL_DATA[48];        //Optional data is avaible only is specially marked entries
     }
 
+    public enum ObjectType : byte
+    {
+        Invalid,
+        Agent,
+        Zealot,
+        FemaleUnguidedA,
+        MaleCivilianA,
+        FemaleCivilianA,
+        EurocorpGuard,
+        SpiderZealot,
+        Police,
+        MaleUnguidedA,
+        Scientist,
+        AgentWu,
+        SuperZealot,
+        FemaleCivilianB,
+        MaleCivilianB,
+        FemaleCivilianC,
+    };
 
+    //Type 0 - agent with no weapons, seems to break everything
+    //Type 1 - agent with no weapons, but works?
+    //Type 2 - Zealot with no weapons
+    //3 - redhead female unguided with uzi
+    //4 blond businessman with uzi - runs away from himself if gun active!
+    //5 Female civilian in miniskirt with uzi - also runs away!
+    //6 Eurocorp guard with uzi and minigun
+    //7 Mechanical spider!
+    //8 Police
+    //9 Unguided Male Punk
+    //10 Scientist - runs away from own gun
+    //11 Agent Wu!
+    //12 - Super Zealot
+    //13 Blonde civilian
+    //14 The leather jacket male civilian
+    //15 - Blonde miniskirt female civ
+    //16 - Doesn't work - get agents playing random anims!
+    //17 - random civilian animations
+    //18 random police broken
+    //19 random civs broken
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     [System.Serializable]
     unsafe public struct BaseObjectData
@@ -662,25 +705,38 @@ namespace SWars
         public ushort unkn02;
         public ushort obj_num1;       //looks like an object number, values are increasing
         public ushort obj_num2;       //another object number?, values are usually increasing
-        public char type;             //Object type;determines speed, visual representation and other parameters
-        public char control_player;   //Number of player controlling the object; 3 for computer,4 for player 1
+        public ObjectType type;             //Object type;determines speed, visual representation and other parameters
+        public byte control_player;   //Number of player controlling the object; 3 for computer,4 for player 1
         public ushort optional_type;  //nonzero if the entry is larger than 168
         public ushort unkn03;         //usually zero, sometimes 4
-        public char unkn05;           //zero
-        public char unkn06;           //have influence on the game, but what it means?
-        public char unkn07;
-        public char unkn08;
-        public char unkn09;           //a copy of unkn7 ???
-        public char unkn10;           //zero ?
-        public char unkn11;
-        public char unkn12;           //zero
-        public ushort unkn14;        //zeros
-        public uint map_posx;      //map position X
-        public uint map_posz;      //map position Z (the ground plane is quite high)
-        public uint map_posy;      //map position Y
+        public byte unkn05;           //zero
+        public byte unkn06;           //have influence on the game, but what it means?
+        public byte unkn07;
+        public byte unkn08;
+        public byte unkn09;           //a copy of unkn7 ???
+        public byte unkn10;           //zero ?
+        public byte unkn11;
+        public byte unkn12;           //zero
+        public ushort unkn14;        //Unique, sorta sequential? 
+
+        public byte x0;
+        public byte x1;
+        public byte x2;
+        public byte x3;
+
+        public byte y0;
+        public byte y1;
+        public byte y2;
+        public byte y3;
+
+        public byte z0;
+        public byte z1;
+        public byte z2;
+        public byte z3;
+
         public ushort unkn15;        //zeros
-        public char unkn16;
-        //after some bytes, at offset 84 //WTF?
+        public byte unkn16;
+
         public ushort unkn24;        //agent number?
         public ushort unkn25;        //zeros;agent don't exist if changed
         public ushort unkn26;        //
@@ -693,6 +749,7 @@ namespace SWars
     [System.Serializable]
     unsafe public struct MissionEvent
     {
+        //Forcing this to be all 0 made the standing guards walk off.
         public fixed byte unknown[32];
     }
 
@@ -743,7 +800,7 @@ namespace SWars
     {
         public fixed byte unknown1[80];
         public fixed byte unknown2[4400];
-        public fixed byte unknown3[4];
+        public fixed byte unknown3[4]; //This seems to have something to do with the initial camera direction?
     }
 
 
@@ -751,9 +808,47 @@ namespace SWars
     [System.Serializable]
     unsafe public struct MissionPlayerData
     {
-        public byte playeridx_0;  //Human-controlled player number
-        public fixed byte order01[43];  //Looks like some kind of ordering data (players?)
+        public byte playeridx_0;                //Human-controlled player number
+        public fixed byte order01[43];          //Looks like some kind of ordering data (players?)
         public fixed byte player_name[40*34];
-        public fixed byte player_data[40*31];
+        public fixed byte player_data[40*31];   //setting this to all 255s made everyone passive!
+    }
+
+
+
+
+    [System.Serializable]
+    public class Mission
+    {
+        public ushort fileType;
+
+        public List<BaseObjectData> objectData = new List<BaseObjectData>();
+        public List<MissionEvent> eventData = new List<MissionEvent>();
+
+        public List<MissionUnknown1> unknown1Data = new List<MissionUnknown1>();
+        public List<MissionUnknown2> unknown2Data = new List<MissionUnknown2>();
+        public List<MissionUnknown3> unknown3Data = new List<MissionUnknown3>();
+
+        public MissionPlayerData playerData;
+        public MissionUnknown1Header unknown1Header;
+
+        public MissionUnknown2Header unknown2Header;
+
+        public MissionUnknown3 unknown3;
+
+        public MissionHeader header;
+
+    }
+
+    [System.Serializable]
+    public class VehicleMeshFile
+    {
+        public VehicleHeader header;
+        public List<Vertex> vertices = new List<Vertex>();
+        public List<Tri> tris = new List<Tri>();
+        public List<Quad> quads = new List<Quad>();
+        public List<MeshDetails> meshes = new List<MeshDetails>();
+        public List<QuadTextureInfo> quadTex = new List<QuadTextureInfo>();
+        public List<TriTextureInfo> triTex = new List<TriTextureInfo>();
     }
 }

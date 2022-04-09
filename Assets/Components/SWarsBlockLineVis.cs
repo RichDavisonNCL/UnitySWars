@@ -5,13 +5,13 @@ using SWars;
 public class SWarsBlockLineVis : MonoBehaviour
 {
     int blockIndex = 0;
-    public MapLoader sourceMap;
+    public SWars.Map sourceMap;
 
     [SerializeField]
     public NPCBlockLine blockD;
 
 
-    public void SetBlockLineDetails(NPCBlockLine details, MapLoader source, int index)
+    public void SetBlockLineDetails(NPCBlockLine details, SWars.Map source, int index)
     {
         blockD      = details;
         sourceMap   = source;

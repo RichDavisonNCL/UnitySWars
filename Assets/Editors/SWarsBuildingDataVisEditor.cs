@@ -22,7 +22,7 @@ public class SWarsBuildingDataVisEditor : Editor
             saving = true;
         }
 
-        MapLoader l = null;
+        SWars.Map l = null;
         for (int i = 0; i < targets.Length; ++i)
         {
             SWarsBuildingDataVis v = (SWarsBuildingDataVis)targets[i];

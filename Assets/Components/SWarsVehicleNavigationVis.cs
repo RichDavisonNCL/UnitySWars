@@ -5,7 +5,7 @@ using SWars;
 public class SWarsVehicleNavigationVis : MonoBehaviour
 {
     int navIndex = 0;
-    public MapLoader sourceMap;
+    public SWars.Map sourceMap;
 
     public int connectionID;
 
@@ -14,7 +14,7 @@ public class SWarsVehicleNavigationVis : MonoBehaviour
     [SerializeField]
     public VehicleNavPoint navData;
 
-    public void SetNavDetails(VehicleNavPoint details, MapLoader source, int index)
+    public void SetNavDetails(VehicleNavPoint details, SWars.Map source, int index)
     {
         navData     = details;
         sourceMap   = source;
