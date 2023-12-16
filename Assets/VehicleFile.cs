@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class VehicleLoader
+public class VehicleFile
 {
     public static void LoadVehicles(string filename, ref List<Mesh> allMeshes)
     {
         SWars.VehicleMeshFile vehicleData = new SWars.VehicleMeshFile();
-        SWars.Functions.LoadVehicleMeshes(filename, ref vehicleData);
+        SWars.Vehicles.LoadMeshes(filename, ref vehicleData);
 
         for (int i = 0; i < vehicleData.header.numMeshes; ++i)
         {
@@ -54,4 +54,11 @@ public class VehicleLoader
             allMeshes.Add(vehicle);
         }
     }
+
+    public static void AddMeshToVehicleFile(Mesh inputMesh, ref SWars.VehicleMeshFile file)
+    {
+
+
+    }
+
 }

@@ -42,7 +42,7 @@ public class MissionLoader : MonoBehaviour
 
     void Start()
     {
-        missionFile = "Assets/GAME/LEVELS/" + filename;
+        missionFile = SWars.FilePath.Get() + "GAME/LEVELS/" + filename;
         LoadMission();
         SaveData();
     }

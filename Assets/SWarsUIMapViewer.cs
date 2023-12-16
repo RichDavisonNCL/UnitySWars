@@ -10,16 +10,16 @@ public class SWarsUIMapViewer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        CreateMapMesh("Assets/GAME/DATA/MAPOUT00.DAT");
-        CreateMapMesh("Assets/GAME/DATA/MAPOUT01.DAT");
-        CreateMapMesh("Assets/GAME/DATA/MAPOUT02.DAT");
-        CreateMapMesh("Assets/GAME/DATA/MAPOUT03.DAT");
-        CreateMapMesh("Assets/GAME/DATA/MAPOUT04.DAT");
+        CreateMapMesh("GAME/DATA/MAPOUT00.DAT");
+        CreateMapMesh("GAME/DATA/MAPOUT01.DAT");
+        CreateMapMesh("GAME/DATA/MAPOUT02.DAT");
+        CreateMapMesh("GAME/DATA/MAPOUT03.DAT");
+        CreateMapMesh("GAME/DATA/MAPOUT04.DAT");
 
-        CreateMapMesh("Assets/GAME/DATA/MAPOUT05.DAT");
-        CreateMapMesh("Assets/GAME/DATA/MAPINSID.DAT");
+        CreateMapMesh("GAME/DATA/MAPOUT05.DAT");
+        CreateMapMesh("GAME/DATA/MAPINSID.DAT");
 
-        CreateCitiesMesh("Assets/GAME/DATA/CITIES.DAT");
+        CreateCitiesMesh("GAME/DATA/CITIES.DAT");
     }
 
 

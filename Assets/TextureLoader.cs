@@ -5,12 +5,12 @@ public class TextureLoader
 {
     public static void CreateSprites(string filename, string paletteName, ref List<Texture2D> outTextures)
     {
-        string datFile = "Assets/GAME/DATA/" + filename + ".DAT";
-        string tabFile = "Assets/GAME/DATA/" + filename + ".TAB";
-        string palFile = "Assets/GAME/DATA/" + paletteName;
+        string datFile = SWars.FilePath.Get() + "GAME/DATA/" + filename + ".DAT";
+        string tabFile = SWars.FilePath.Get() + "GAME/DATA/" + filename + ".TAB";
+        string palFile = SWars.FilePath.Get() + "GAME/DATA/" + paletteName;
 
         List<SWars.TABFileEntry> allEntries = new List<SWars.TABFileEntry>();
-        SWars.TextureFunctions.ReadTABEntries(tabFile, ref allEntries);
+        SWars.Textures.ReadTABEntries(tabFile, ref allEntries);
 
         Color[] paletteColours = PaletteFileToColours(palFile);
 
@@ -18,7 +18,7 @@ public class TextureLoader
 
         List<Texture2D> processedTextures = new List<Texture2D>();
 
-        SWars.TextureFunctions.ReadDATFile(datFile, ref allEntries,
+        SWars.Textures.ReadDATFile(datFile, ref allEntries,
             (i, width, height, data) =>
             {
                 Texture2D tex = CreateTextureFromDatasets(filename + fileCount, width, height, data, paletteColours);
@@ -32,12 +32,12 @@ public class TextureLoader
 
     public static Texture2D CreateTexture(string filename, string paletteName, int width, int height)
     {
-        string dataFile  = "Assets/GAME/DATA/" + filename;
-        string palFile   = "Assets/GAME/DATA/" + paletteName;
+        string dataFile  = SWars.FilePath.Get() + "GAME/DATA/" + filename;
+        string palFile   = SWars.FilePath.Get() + "GAME/DATA/" + paletteName;
 
         Color[] paletteColours = PaletteFileToColours(palFile);
         Texture2D newTex = null;
-        SWars.TextureFunctions.ReadDATFile(dataFile, width, height,
+        SWars.Textures.ReadDATFile(dataFile, width, height,
             (i, w, h, data) =>
             {
                 newTex = CreateTextureFromDatasets(filename, width, height, data, paletteColours);
@@ -51,7 +51,7 @@ public class TextureLoader
         Color[] paletteColours = new Color[256];
         int colourIndex = 0;
 
-        SWars.TextureFunctions.ReadPaletteFile(filename, 
+        SWars.Textures.ReadPaletteFile(filename, 
             (r, g, b, a) => paletteColours[colourIndex++] = new Color(r,g,b,a));
 
         return paletteColours;

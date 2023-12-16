@@ -47,6 +47,9 @@ public class SWarsLoader : MonoBehaviour
     [SerializeField]
     int lastRange = 79;
 
+    [SerializeField]
+    string swarsGameLocation = "Assets/";
+
     static public Dictionary<int, Texture2D> tempSpriteLookup; //I got these through inspection, must have a proper definition somewhere!
 
 
@@ -56,7 +59,8 @@ public class SWarsLoader : MonoBehaviour
 
 
     void Start()
-    { 
+    {
+        SWars.FilePath.Set(swarsGameLocation);
         LoadTextures();       
         LoadSprites();
         CreateSpriteLookup();
@@ -173,7 +177,7 @@ public class SWarsLoader : MonoBehaviour
 
     void LoadVehicles()
     {
-        VehicleLoader.LoadVehicles("Assets/GAME/QDATA/PRIMVEH.OBJ", ref loadedVehicles);
+        VehicleFile.LoadVehicles(SWars.FilePath.Get() + "GAME/QDATA/PRIMVEH.OBJ", ref loadedVehicles);
 
         GameObject vehicleObj       = new GameObject("Vehicles");
         vehicleObj.transform.parent = transform;
@@ -214,7 +218,7 @@ public class SWarsLoader : MonoBehaviour
                 }
                 mapID += i;
                 Debug.Log("Trying to load map " + i);
-                loadedMaps.Add(LoadMap("Assets/GAME/MAPS/" + mapID + ".MAD"));
+                loadedMaps.Add(LoadMap("GAME/MAPS/" + mapID + ".MAD"));
             }
         }
         else
@@ -226,7 +230,7 @@ public class SWarsLoader : MonoBehaviour
             }
             mapID += mapToLoad;
 
-            loadedMaps.Add(LoadMap("Assets/GAME/MAPS/" + mapID + ".MAD"));
+            loadedMaps.Add(LoadMap("GAME/MAPS/" + mapID + ".MAD"));
         }
 
         GameObject mapObj = new GameObject("Maps");
@@ -263,9 +267,9 @@ public class SWarsLoader : MonoBehaviour
 
     void LoadAnimStates()
     {
-        string staFile = "Assets/GAME/DATA/MSTA-0.ANI";
-        string fraFile = "Assets/GAME/DATA/MFRA-0.ANI";
-        string eleFile = "Assets/GAME/DATA/MELE-0.ANI";
+        string staFile = SWars.FilePath.Get() + "GAME/DATA/MSTA-0.ANI";
+        string fraFile = SWars.FilePath.Get() + "GAME/DATA/MFRA-0.ANI";
+        string eleFile = SWars.FilePath.Get() + "GAME/DATA/MELE-0.ANI";
 
         staEntries = new List<SWars.STAFileEntry>();
         fraEntries = new List<SWars.FRAFileEntry>();
