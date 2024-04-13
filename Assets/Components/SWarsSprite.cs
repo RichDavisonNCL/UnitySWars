@@ -12,14 +12,4 @@ public class SWarsSprite : MonoBehaviour
     int frame = -1;
 
     SWars.FRAFileEntry frameData;
-
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {     
-    }
 }

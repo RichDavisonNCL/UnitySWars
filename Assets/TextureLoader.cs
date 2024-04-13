@@ -10,7 +10,7 @@ public class TextureLoader
         string palFile = SWars.FilePath.Get() + "GAME/DATA/" + paletteName;
 
         List<SWars.TABFileEntry> allEntries = new List<SWars.TABFileEntry>();
-        SWars.Textures.ReadTABEntries(tabFile, ref allEntries);
+        SWars.SWarsTextures.ReadTABEntries(tabFile, ref allEntries);
 
         Color[] paletteColours = PaletteFileToColours(palFile);
 
@@ -18,7 +18,7 @@ public class TextureLoader
 
         List<Texture2D> processedTextures = new List<Texture2D>();
 
-        SWars.Textures.ReadDATFile(datFile, ref allEntries,
+        SWars.SWarsTextures.ReadDATFile(datFile, ref allEntries,
             (i, width, height, data) =>
             {
                 Texture2D tex = CreateTextureFromDatasets(filename + fileCount, width, height, data, paletteColours);
@@ -37,7 +37,7 @@ public class TextureLoader
 
         Color[] paletteColours = PaletteFileToColours(palFile);
         Texture2D newTex = null;
-        SWars.Textures.ReadDATFile(dataFile, width, height,
+        SWars.SWarsTextures.ReadDATFile(dataFile, width, height,
             (i, w, h, data) =>
             {
                 newTex = CreateTextureFromDatasets(filename, width, height, data, paletteColours);
@@ -51,7 +51,7 @@ public class TextureLoader
         Color[] paletteColours = new Color[256];
         int colourIndex = 0;
 
-        SWars.Textures.ReadPaletteFile(filename, 
+        SWars.SWarsTextures.ReadPaletteFile(filename, 
             (r, g, b, a) => paletteColours[colourIndex++] = new Color(r,g,b,a));
 
         return paletteColours;
@@ -60,19 +60,23 @@ public class TextureLoader
     public static Texture2D CreateTextureFromDatasets(string name, int width, int height, byte[] texData, Color[] paletteData)
     {
         Texture2D newTex = new Texture2D(width, height);
-
-        for (int y = 0; y < height; ++y) 
-        {
-            for (int x = 0; x < width; ++x)
-            {
-                int pixIndex = (y * width) + x;
-                newTex.SetPixel(x, y, paletteData[texData[pixIndex]]);
-            }
-        }
         newTex.filterMode = FilterMode.Point;
         newTex.alphaIsTransparency = true;
-        newTex.Apply();
         newTex.name = name;
+
+        if (width > 0 && height > 0)
+        {
+            for (int y = 0; y < height; ++y)
+            {
+                for (int x = 0; x < width; ++x)
+                {
+                    int pixIndex = (y * width) + x;
+                    newTex.SetPixel(x, y, paletteData[texData[pixIndex]]);
+                }
+            }
+            newTex.Apply();
+        }
+
         return newTex;
     }
 }

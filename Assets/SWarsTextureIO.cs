@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class SWarsTextureIO : MonoBehaviour
@@ -15,6 +16,14 @@ public class SWarsTextureIO : MonoBehaviour
 
     public void CreateMaterials()
     {
+        gameMaterial = null;
+        mapTextures.Clear();
+
+        foreach (Transform child in transform)
+        {
+            DestroyImmediate(child.gameObject);
+        }
+
         mapTextures.Add(TextureLoader.CreateTexture("TEX00.DAT", "PAL0.DAT", 256, 256));
         mapTextures.Add(TextureLoader.CreateTexture("TEX01.DAT", "PAL0.DAT", 256, 256));
         mapTextures.Add(TextureLoader.CreateTexture("TEX02.DAT", "PAL0.DAT", 256, 256));
@@ -35,6 +44,7 @@ public class SWarsTextureIO : MonoBehaviour
         GameObject textureObj = new GameObject(objectName);
         textureObj.transform.parent = transform;
         textureObj.transform.localScale = Vector3.one;
+        textureObj.transform.localPosition = Vector3.zero;
 
         float offset = 0.0f;
 
@@ -50,7 +60,8 @@ public class SWarsTextureIO : MonoBehaviour
             o.GetComponent<MeshRenderer>().material = m;
             o.name = textures[i].name;
 
-            offset += textures[i].width;
+            offset += textures[i].width;       
         }
+        Undo.RegisterCreatedObjectUndo(textureObj, "Create Texture Visualisation");
     }
 }

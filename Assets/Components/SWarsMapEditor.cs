@@ -177,14 +177,14 @@ public class SWarsMapEditor : MonoBehaviour
             float yOffset = loadedMap.vHeights[(int)block.x2, (int)block.y2] * 256.0f;
 
             MeshRenderer r = o.GetComponent<MeshRenderer>();
-            r.material = textureIO.baseMaterial;
+            r.sharedMaterial = textureIO.baseMaterial;
 
             Texture2D spriteTex = null;
             spriteIO.spriteLookup.TryGetValue(block.spritenum, out spriteTex);
 
             if (spriteTex)
             {
-                r.material.mainTexture = spriteTex;
+                r.sharedMaterial.mainTexture = spriteTex;
 
                 o.transform.localScale = new Vector3(spriteTex.width, spriteTex.height, 1) * 8;
 

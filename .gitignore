@@ -59,3 +59,6 @@ sysinfo.txt
 crashlytics-build.properties
 
 /Assets/GAME
+/Assets/*.meta
+/Assets/Components/*.meta
+/Assets/Editors/*.meta

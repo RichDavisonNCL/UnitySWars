@@ -362,7 +362,7 @@ public class MissionLoader : MonoBehaviour
 
             o.transform.localPosition = new Vector3(x, y, z);
 
-            SWarsGameObjectVis vis = o.AddComponent<SWarsGameObjectVis>();
+            SWarsGameObjectNode vis = o.AddComponent<SWarsGameObjectNode>();
             vis.sourceMission = this;
             vis.data = mission.objectData[i];
             vis.dataIndex = i;

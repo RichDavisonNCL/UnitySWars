@@ -122,10 +122,11 @@ public class SWarsSpritesIO : MonoBehaviour
 	SwarsTexture::TexturesFromSwarsTAB(fonts,"FONT0-4", "fonttest","Fonts-E");
 	SwarsTexture::TexturesFromSwarsTAB(fonts,"FONT0-5", "fonttest","Fonts-F"); 
          */
-        VisualiseTextureSet(ref spriteTextures, "SpriteTextures");
+        GameObject set = VisualiseTextureSet(ref spriteTextures, "SpriteTextures");
+        set.transform.localPosition = new Vector3(0,128,0);
     }
 
-    void VisualiseTextureSet(ref List<Texture2D> textures, string objectName)
+    GameObject VisualiseTextureSet(ref List<Texture2D> textures, string objectName)
     {
         GameObject textureObj = new GameObject(objectName);
         textureObj.transform.parent = transform;
@@ -139,7 +140,7 @@ public class SWarsSpritesIO : MonoBehaviour
             GameObject o = GameObject.CreatePrimitive(PrimitiveType.Quad);
             o.transform.parent = textureObj.transform;
 
-            o.transform.localPosition = new Vector3(offset, 0, 0);
+            o.transform.localPosition = new Vector3(offset + (textures[i].width / 2), 0, 0);
             o.transform.localScale = new Vector3(textures[i].width, textures[i].height, 0.0f);
             Material m = new Material(textureIO.baseMaterial);
             m.mainTexture = textures[i];
@@ -148,6 +149,8 @@ public class SWarsSpritesIO : MonoBehaviour
 
             offset += textures[i].width;
         }
+
+        return textureObj;
     }
 
     void LoadAnimFrames()
@@ -220,7 +223,8 @@ public class SWarsSpritesIO : MonoBehaviour
 
         Debug.Log("Created " + f + " individual sprite frames");
 
-        VisualiseTextureSet(ref spriteFrameTextures, "SpriteFrameTextures");
+        GameObject set = VisualiseTextureSet(ref spriteFrameTextures, "SpriteFrameTextures");
+        set.transform.localPosition = new Vector3(0, 0, 0);
     }
 
     void BlitTexture(Texture2D src, Texture2D dst, SWars.ELEFileEntry entry)

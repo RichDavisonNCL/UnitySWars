@@ -88,6 +88,5 @@ public class SWarsUIMapViewer : MonoBehaviour
         MeshRenderer r  = o.AddComponent<MeshRenderer>();
         MeshFilter f    = o.AddComponent<MeshFilter>();
         f.mesh = m;
-        //r.materials = matSet;
     }
 }

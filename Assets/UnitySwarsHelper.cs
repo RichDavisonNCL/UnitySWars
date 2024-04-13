@@ -58,5 +58,27 @@ namespace SWars
             to.Add(lastIndex + 3);
             to.Add(lastIndex + 1);
         }
+
+        static public bool UnityToSWarsMesh(Mesh m, ref SWars.MeshDetails swarsMesh)
+        {
+            swarsMesh = new MeshDetails();
+
+
+            return true;
+        }
+
+        static public Vertex UnityVec3ToVertex(Vector3 v)
+        {
+            Vertex vertex = new Vertex();
+
+            vertex.x = (short)v.x;
+            vertex.y = (short)v.y;
+            vertex.z = (short)v.z;
+
+            vertex.unknown1 = 0;
+            vertex.unknown2 = 0;
+
+            return vertex;
+        }
     }
 }
