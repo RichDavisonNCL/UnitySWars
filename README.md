@@ -1,7 +1,9 @@
 # UnitySWars
 Importer / Exporter of Syndicate Wars files for Unity Game Engine
 
-Drop GAME folder of SWars install CD into Assets folder to use.
+Drop GAME folder of SWars install CD into Assets folder to use. It should look like this:
+
+![image](Folder.png)
 
 
 **Assets/Scenes/SampleScene**: Scene for testing the different loaders. Navigate to the _SwarsLoader_ object and press the _Initialise_ button to load the current setup. 
