@@ -4,7 +4,7 @@ using System.IO;
 using SWars;
 using UnityEngine;
 
-public class SWarsMapEditor : MonoBehaviour
+public class SWarsMapInstanceEditor : MonoBehaviour
 {
     [SerializeField]
     public SWars.Map loadedMap;
@@ -276,6 +276,10 @@ public class SWarsMapEditor : MonoBehaviour
     }
     void CreateBuildingMeshes(GameObject rootObject)
     {
+        string palFile = SWars.FilePath.Get() + "GAME/DATA/" + "PAL0.DAT";
+
+        Color[] paletteColours = TextureLoader.PaletteFileToColours(palFile);
+
         List<GameObject> buildings = new List<GameObject>();
         //Each building is actually made up of a number of submeshes!
         int buildingCount = 0;
@@ -297,61 +301,8 @@ public class SWarsMapEditor : MonoBehaviour
 
         for (int i = 0; i < loadedMap.header.numMeshes; ++i)
         {
-            List<Vector3> meshVertices = new List<Vector3>();
-            List<Vector2> meshTexCoords = new List<Vector2>();
-            List<int>[] meshIndices = new List<int>[5];
-
-            for (int j = 0; j < 5; ++j)
-            {
-                meshIndices[j] = new List<int>();
-            }
-
-            for (int v = 0; v < loadedMap.meshes[i].triIndexNum; ++v)
-            {
-                SWars.Tri tri = SWars.Functions.GetTri(loadedMap.meshes[i].triIndexBegin + v, ref loadedMap.tris);
-                SWars.TriTextureInfo triUV = SWars.Functions.GetTriTexture(tri.faceIndex, ref loadedMap.triTexInfo);
-
-                int layer = triUV.texNum;
-
-                if (layer < 0 || layer > 4)
-                {
-                    layer = 0;
-                }
-
-                SWars.Unity.AddTriIndices(ref meshIndices[layer], meshVertices.Count);
-                SWars.Unity.AddTriTexCoords(ref meshTexCoords, triUV);
-                SWars.Unity.AddTriVertices(ref meshVertices, ref loadedMap.vertices, ref tri);
-            }
-            for (int v = 0; v < loadedMap.meshes[i].quadIndexNum; ++v)
-            {
-                SWars.Quad quad = SWars.Functions.GetQuad(loadedMap.meshes[i].quadIndexBegin + v, ref loadedMap.quads);
-                SWars.QuadTextureInfo quadUV = SWars.Functions.GetQuadTexture(quad.faceIndex, ref loadedMap.quadTexInfo);
-
-                int layer = quadUV.texNum;
-
-                if (layer < 0 || layer > 4)
-                {
-                    layer = 0;
-                }
-
-                SWars.Unity.AddQuadIndices(ref meshIndices[layer], meshVertices.Count);
-                SWars.Unity.AddQuadTexCoords(ref meshTexCoords, quadUV);
-                SWars.Unity.AddQuadVertices(ref meshVertices, ref loadedMap.vertices, ref quad);
-            }
-            Mesh buildingPart = new Mesh();
-            buildingPart.SetVertices(meshVertices);
-            buildingPart.SetUVs(0, meshTexCoords);
-            buildingPart.subMeshCount = 5;
-            for (int j = 0; j < 5; ++j)
-            {
-                buildingPart.SetIndices(meshIndices[j], MeshTopology.Triangles, j);
-            }
-            buildingPart.name = "Section " + i;
-
-            if (loadedMap.meshes[i].buildingIndex >= buildings.Count)
-            {
-                Debug.Log("Invalid building index " + loadedMap.meshes[i].buildingIndex);
-            }
+            List<int> faceLookup = new List<int>();
+            Mesh buildingPart = SWars.Unity.CreateMesh(loadedMap.meshes[i], loadedMap.vertices, loadedMap.tris, loadedMap.triTexInfo, loadedMap.quads, loadedMap.quadTexInfo, faceLookup);
 
             GameObject o = new GameObject();
             o.name = "Building part " + buildings[loadedMap.meshes[i].buildingIndex].transform.childCount;
@@ -370,6 +321,9 @@ public class SWarsMapEditor : MonoBehaviour
 
             SWarsBuildingDataVis dataVis = o.AddComponent<SWarsBuildingDataVis>();
             dataVis.SetMeshDetails(loadedMap.meshes[i], loadedMap, i);
+
+            SWarsBuilding vc = o.AddComponent<SWarsBuilding>();
+            vc.SetState( i, loadedMap, faceLookup);
 
             //dataVis.SetBlockDDetails(dataBlockD[i], this, i);
 

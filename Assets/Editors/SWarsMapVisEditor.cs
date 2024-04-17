@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(SWarsMapEditor))]
+[CustomEditor(typeof(SWarsMapInstanceEditor))]
 [CanEditMultipleObjects]
 public class SWarsMapVisEditor : Editor
 {
@@ -27,8 +27,7 @@ public class SWarsMapVisEditor : Editor
 
         for (int i = 0; i < targets.Length; ++i)
         {
-
-            SWarsMapEditor v = (SWarsMapEditor)targets[i];
+            SWarsMapInstanceEditor v = (SWarsMapInstanceEditor)targets[i];
 
             if (saving)
             {

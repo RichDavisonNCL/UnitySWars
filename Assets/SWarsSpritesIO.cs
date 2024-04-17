@@ -123,7 +123,8 @@ public class SWarsSpritesIO : MonoBehaviour
 	SwarsTexture::TexturesFromSwarsTAB(fonts,"FONT0-5", "fonttest","Fonts-F"); 
          */
         GameObject set = VisualiseTextureSet(ref spriteTextures, "SpriteTextures");
-        set.transform.localPosition = new Vector3(0,128,0);
+        set.transform.localPosition = new Vector3(16384.0f,0,0);
+        set.transform.localScale = Vector3.one * 8.0f;
     }
 
     GameObject VisualiseTextureSet(ref List<Texture2D> textures, string objectName)
@@ -135,12 +136,16 @@ public class SWarsSpritesIO : MonoBehaviour
 
         float offset = 0.0f;
 
+        float y = 0;
+        int countX = 0;
+        float maxY = 0.0f;
+
         for (int i = 0; i < textures.Count; ++i)
         {
             GameObject o = GameObject.CreatePrimitive(PrimitiveType.Quad);
             o.transform.parent = textureObj.transform;
 
-            o.transform.localPosition = new Vector3(offset + (textures[i].width / 2), 0, 0);
+            o.transform.localPosition = new Vector3(offset + (textures[i].width / 2), y, 0);
             o.transform.localScale = new Vector3(textures[i].width, textures[i].height, 0.0f);
             Material m = new Material(textureIO.baseMaterial);
             m.mainTexture = textures[i];
@@ -148,6 +153,17 @@ public class SWarsSpritesIO : MonoBehaviour
             o.name = textures[i].name;
 
             offset += textures[i].width;
+
+            maxY = Mathf.Max(maxY, textures[i].height);
+
+            ++countX;
+            if(countX > 32)
+            {
+                countX = 0;
+                y += maxY;
+                maxY = 0.0f;
+                offset = 0.0f;
+            }
         }
 
         return textureObj;
@@ -225,6 +241,7 @@ public class SWarsSpritesIO : MonoBehaviour
 
         GameObject set = VisualiseTextureSet(ref spriteFrameTextures, "SpriteFrameTextures");
         set.transform.localPosition = new Vector3(0, 0, 0);
+        set.transform.localScale = Vector3.one * 8.0f;
     }
 
     void BlitTexture(Texture2D src, Texture2D dst, SWars.ELEFileEntry entry)

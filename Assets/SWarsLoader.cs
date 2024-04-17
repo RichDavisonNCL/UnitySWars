@@ -9,7 +9,7 @@ public class SWarsLoader : MonoBehaviour
     SWarsTextureIO textureIO;
 
     [SerializeField]
-    SWarsVehicleIO vehicleIO;
+    VehicleFile vehicleFile;
 
     [SerializeField]
     SWarsMapIO mapIO;
@@ -34,7 +34,7 @@ public class SWarsLoader : MonoBehaviour
 
         textureIO?.CreateMaterials();
 
-        vehicleIO?.LoadVehicles();
+        vehicleFile?.LoadVehicles();
 
         spritesIO?.LoadSpriteFiles();
 

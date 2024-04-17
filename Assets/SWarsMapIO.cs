@@ -70,7 +70,7 @@ public class SWarsMapIO : MonoBehaviour
         o.transform.localScale = Vector3.one;
         o.transform.localPosition = Vector3.zero;
 
-        SWarsMapEditor vis = o.AddComponent<SWarsMapEditor>();
+        SWarsMapInstanceEditor vis = o.AddComponent<SWarsMapInstanceEditor>();
         vis.LoadMap(name, textureIO, spritesIO);
 
         return o;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(SWarsMapEditor))]
+[CustomEditor(typeof(SWarsMapInstanceEditor))]
 public class SWarsMapEditorIntegration : Editor
 {
     public override void OnInspectorGUI()
@@ -14,14 +14,14 @@ public class SWarsMapEditorIntegration : Editor
 
         if (GUILayout.Button("Save Map"))
         {
-            SWarsMapEditor m = (SWarsMapEditor)target;
+            SWarsMapInstanceEditor m = (SWarsMapInstanceEditor)target;
             m.SaveMapFile();
         }
 
 
         if (GUILayout.Button("Add New Block Line"))
         {
-            SWarsMapEditor m = (SWarsMapEditor)target;
+            SWarsMapInstanceEditor m = (SWarsMapInstanceEditor)target;
             m.AddNewBlockLine();
         }
     }
